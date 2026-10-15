@@ -943,9 +943,37 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <button type="submit" class="btn-gold" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem;">
           Entrar no Sistema
         </button>
-      </form>
+        </form>
+      </div>
 
-      
+      <!-- TAB 2: SOLICITAÇÃO DE ACESSO -->
+      <div id="request-tab" class="login-tab-content" style="display: none;">
+        <form id="form-request" onsubmit="handleRequestSubmit(event)">
+          <div id="request-success-msg" class="login-error" style="background-color: #def7ec; border-left-color: #0a8f3c; color: #03543f; display: none; margin-bottom: 1rem;">
+            ✓ Solicitação enviada com sucesso! Você receberá uma resposta em breve.
+          </div>
+
+          <div class="form-group">
+            <label for="req-nome">Nome Completo *</label>
+            <input type="text" id="req-nome" class="form-control" placeholder="Seu nome completo" required>
+          </div>
+          <div class="form-group">
+            <label for="req-email">E-mail *</label>
+            <input type="email" id="req-email" class="form-control" placeholder="seu@email.com.br" required>
+          </div>
+          <div class="form-group">
+            <label for="req-empresa">Empresa / Cliente *</label>
+            <input type="text" id="req-empresa" class="form-control" placeholder="Sua empresa" required>
+          </div>
+          <div class="form-group">
+            <label for="req-motivo">Motivo da Solicitação *</label>
+            <textarea id="req-motivo" class="form-control" rows="3" placeholder="Por que precisa de acesso?" required></textarea>
+          </div>
+          <button type="submit" class="btn-gold" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem;">
+            Enviar Solicitação
+          </button>
+        </form>
+      </div>
 
       <a href="index.html" class="login-footer-link">&larr; Voltar ao site principal</a>
     </div>
