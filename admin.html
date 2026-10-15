@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Administração | Bergamini Advogado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #061529; --navy-dark: #030c18; --gold: #C49A5A; --gold-hover: #b08647; --gold-light: #f7f1e5;
+      --text-main: #1c1c1c; --text-sub: #555e6d; --bg-body: #f5f6f8; --border-color: #e2e6ea;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, sans-serif; color: var(--text-main); background: var(--bg-body); min-height: 100vh; }
+    h1, h2, h3, .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    a { color: var(--navy); }
+
+    .topo { background: var(--navy); border-bottom: 2px solid var(--gold); color: #fff; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+    .marca { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 1.5px; }
+    .marca small { font-family: 'Inter', sans-serif; font-size: 0.72rem; color: var(--gold); margin-left: 0.5rem; letter-spacing: 0.5px; }
+    .topo-acoes { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.85rem; color: #e2e8f0; }
+    .btn-topo { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 0.35rem 0.85rem; font-size: 0.8125rem; border-radius: 4px; cursor: pointer; text-decoration: none; }
+    .btn-topo:hover { background: rgba(255,255,255,0.1); }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
+    .titulo { font-size: 2rem; color: var(--navy); }
+    .sub { color: var(--text-sub); font-size: 0.9rem; margin: 0.15rem 0 1.5rem; }
+
+    .abas { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.25rem; overflow-x: auto; }
+    .aba { background: none; border: none; border-bottom: 3px solid transparent; padding: 0.75rem 1.1rem; font: 600 0.92rem 'Inter', sans-serif; color: #8a93a2; cursor: pointer; white-space: nowrap; margin-bottom: -1px; }
+    .aba.ativa { color: var(--navy); border-bottom-color: var(--gold); }
+    .contador { background: #e02424; color: #fff; border-radius: 999px; font-size: 0.7rem; padding: 0.05rem 0.45rem; margin-left: 0.3rem; vertical-align: middle; }
+
+    .caixa { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem; }
+    .caixa h3 { font-size: 1.3rem; color: var(--navy); margin-bottom: 0.85rem; }
+    .barra { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+    .barra input { flex: 1; min-width: 220px; }
+
+    .tabela-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { background: #f8fafc; color: var(--navy); text-align: left; padding: 0.75rem 0.85rem; border-bottom: 2px solid var(--border-color); white-space: nowrap; font-weight: 600; }
+    td { padding: 0.75rem 0.85rem; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+    td.acoes { white-space: nowrap; text-align: right; }
+    .mini { font-size: 0.78rem; color: var(--text-sub); }
+    .vazio { text-align: center; color: #888; padding: 1.5rem; }
+
+    .selo { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+    .s-ativo { background: #def7ec; color: #03543f; }
+    .s-pendente { background: #fef3c7; color: #92400e; }
+    .s-bloqueado { background: #fde8e8; color: #9b1c1c; }
+    .s-recusado { background: #e5e7eb; color: #374151; }
+    .s-admin { background: var(--gold-light); color: #8e6522; }
+
+    .btn { border-radius: 6px; font: 600 0.82rem 'Inter', sans-serif; padding: 0.45rem 0.85rem; cursor: pointer; border: 1px solid transparent; margin-left: 0.25rem; }
+    .btn-ouro { background: var(--gold); color: #fff; border-color: var(--gold); }
+    .btn-ouro:hover { background: var(--gold-hover); }
+    .btn-claro { background: #fff; color: var(--navy); border-color: var(--border-color); }
+    .btn-claro:hover { background: #f1f3f5; }
+    .btn-perigo { background: #fff; color: #b91c1c; border-color: #f3c2c2; }
+    .btn-perigo:hover { background: #fde8e8; }
+    .btn:disabled { opacity: 0.55; cursor: wait; }
+
+    label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--navy); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.4px; }
+    .campo { margin-bottom: 1rem; }
+    input, select, textarea { width: 100%; padding: 0.65rem 0.8rem; font-size: 0.92rem; border: 1px solid #d2d6dc; border-radius: 6px; font-family: inherit; background: #fff; }
+    input:focus, select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(196,154,90,0.2); }
+    .grade { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+
+    .msg { padding: 0.75rem 0.9rem; border-radius: 4px; border-left: 4px solid; font-size: 0.875rem; margin-bottom: 1rem; line-height: 1.45; }
+    .msg.erro { background: #fde8e8; border-color: #e02424; color: #9b1c1c; }
+    .msg.ok { background: #def7ec; border-color: #0a8f3c; color: #03543f; }
+    .msg.info { background: #eef4ff; border-color: #2563eb; color: #1e3a8a; }
+    .msg a, .msg button.lk { color: inherit; font-weight: 700; }
+    button.lk { background: none; border: none; text-decoration: underline; cursor: pointer; font: inherit; }
+
+    .portao { max-width: 480px; margin: 4rem auto; text-align: center; }
+    .portao .caixa { padding: 2rem; }
+
+    .modal-fundo { position: fixed; inset: 0; background: rgba(6,21,41,0.6); display: none; align-items: flex-start; justify-content: center; padding: 1rem; z-index: 50; overflow-y: auto; }
+    .modal-fundo.aberto { display: flex; }
+    .modal { background: #fff; width: 100%; max-width: 560px; border-radius: 8px; overflow: hidden; margin: auto; }
+    .modal-topo { background: var(--navy); color: #fff; padding: 1rem 1.25rem; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
+    .modal-topo h3 { font-size: 1.35rem; }
+    .fechar { background: none; border: none; color: #cbd5e1; font-size: 1.5rem; cursor: pointer; }
+    .modal-corpo { padding: 1.25rem; }
+    .modal-rodape { padding: 0.9rem 1.25rem; background: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+    @media (max-width: 700px) {
+      .grade { grid-template-columns: 1fr; }
+      .titulo { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">BERGAMINI ADVOGADO <small>JURISPRO · ADMINISTRAÇÃO</small></div>
+    <div class="topo-acoes">
+      <span id="quem"></span>
+      <a class="btn-topo" href="jurispro_gest_o_processual_2_.html">&larr; Área Interna</a>
+      <button class="btn-topo" id="btn-sair" style="display:none;">Sair</button>
+    </div>
+  </header>
+
+  <!-- Verificação de acesso -->
+  <div id="portao" class="portao">
+    <div class="caixa">
+      <h2 class="serif" style="color: var(--navy); margin-bottom: 0.75rem;">Administração</h2>
+      <p id="portao-texto" class="mini" style="font-size: 0.95rem;">Verificando acesso...</p>
+    </div>
+  </div>
+
+  <main id="painel" style="display:none;">
+    <h1 class="titulo">Administração de usuários</h1>
+    <p class="sub">Aprove pedidos de acesso e controle quem pode usar a Área Interna.</p>
+
+    <div class="abas">
+      <button class="aba ativa" data-aba="pendentes">Pedidos pendentes <span id="cont-pend" class="contador" style="display:none;"></span></button>
+      <button class="aba" data-aba="usuarios">Usuários</button>
+      <button class="aba" data-aba="conta">Minha conta</button>
+    </div>
+
+    <div id="msg-geral" class="msg" data-base="msg" style="display:none;"></div>
+
+    <!-- PENDENTES -->
+    <section id="aba-pendentes">
+      <div class="caixa">
+        <h3>Pedidos aguardando aprovação</h3>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Nome / usuário</th><th>Contato</th><th>Motivo</th><th></th></tr></thead>
+            <tbody id="tb-pendentes"><tr><td colspan="5" class="vazio">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- USUÁRIOS -->
+    <section id="aba-usuarios" style="display:none;">
+      <div class="caixa">
+        <div class="barra">
+          <input type="search" id="busca" placeholder="Buscar por nome, usuário ou e-mail...">
+          <select id="filtro-status" style="width:auto;">
+            <option value="">Todos os status</option>
+            <option value="ativo">Ativos</option>
+            <option value="pendente">Pendentes</option>
+            <option value="bloqueado">Bloqueados</option>
+            <option value="recusado">Recusados</option>
+          </select>
+          <button class="btn btn-ouro" id="btn-novo">+ Novo usuário</button>
+        </div>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Nome / usuário</th><th>Contato</th><th>Perfil</th><th>Status</th><th>Cadastro</th><th></th></tr></thead>
+            <tbody id="tb-usuarios"><tr><td colspan="6" class="vazio">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MINHA CONTA -->
+    <section id="aba-conta" style="display:none;">
+      <div class="caixa" style="max-width: 560px;">
+        <h3>Meu nome de usuário</h3>
+        <div id="msg-usuario" class="msg" data-base="msg" style="display:none;"></div>
+        <form id="form-usuario">
+          <div class="campo">
+            <label for="meu-usuario">Usuário de login</label>
+            <input type="text" id="meu-usuario" required autocapitalize="none" pattern="[A-Za-z0-9._\-]{3,30}">
+          </div>
+          <button class="btn btn-ouro" type="submit" style="margin-left:0;">Salvar usuário</button>
+        </form>
+      </div>
+      <div class="caixa" style="max-width: 560px;">
+        <h3>Trocar minha senha</h3>
+        <div id="msg-senha" class="msg" data-base="msg" style="display:none;"></div>
+        <form id="form-senha">
+          <div class="campo">
+            <label for="senha-atual">Senha atual</label>
+            <input type="password" id="senha-atual" required autocomplete="current-password">
+          </div>
+          <div class="grade">
+            <div class="campo">
+              <label for="senha-nova">Nova senha</label>
+              <input type="password" id="senha-nova" minlength="6" required autocomplete="new-password">
+            </div>
+            <div class="campo">
+              <label for="senha-nova2">Repita a nova senha</label>
+              <input type="password" id="senha-nova2" minlength="6" required autocomplete="new-password">
+            </div>
+          </div>
+          <button class="btn btn-ouro" type="submit" style="margin-left:0;">Trocar senha</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: EDITAR / NOVO USUÁRIO -->
+  <div class="modal-fundo" id="modal">
+    <div class="modal">
+      <div class="modal-topo"><h3 id="modal-titulo">Usuário</h3><button class="fechar" id="modal-fechar" aria-label="Fechar">&times;</button></div>
+      <form id="form-modal">
+        <div class="modal-corpo">
+          <div id="msg-modal" class="msg" data-base="msg" style="display:none;"></div>
+          <div class="campo"><label for="m-nome">Nome completo *</label><input id="m-nome" required></div>
+          <div class="grade">
+            <div class="campo"><label for="m-email">E-mail *</label><input id="m-email" type="email" required></div>
+            <div class="campo"><label for="m-whatsapp">WhatsApp</label><input id="m-whatsapp" type="tel"></div>
+          </div>
+          <div class="grade">
+            <div class="campo"><label for="m-usuario">Usuário *</label><input id="m-usuario" required autocapitalize="none" pattern="[A-Za-z0-9._\-]{3,30}"></div>
+            <div class="campo" id="campo-senha"><label for="m-senha">Senha provisória *</label><input id="m-senha" type="text" minlength="6"></div>
+          </div>
+          <div class="grade">
+            <div class="campo"><label for="m-perfil">Perfil</label>
+              <select id="m-perfil"><option value="usuario">Usuário</option><option value="admin">Administrador</option></select>
+            </div>
+            <div class="campo"><label for="m-status">Status</label>
+              <select id="m-status"><option value="ativo">Ativo</option><option value="pendente">Pendente</option><option value="bloqueado">Bloqueado</option><option value="recusado">Recusado</option></select>
+            </div>
+          </div>
+          <p class="mini" id="m-dica"></p>
+        </div>
+        <div class="modal-rodape">
+          <button type="button" class="btn btn-claro" id="modal-cancelar">Cancelar</button>
+          <button type="submit" class="btn btn-ouro" id="modal-salvar">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script type="module">
+    import {
+      CONFIG, CONFIG_OK, auth, db, ADMIN_EMAIL, SITE, $, esc, msg, traduz, normUsuario, usuarioValido,
+      soDigitos, linkZap, fmtData, ehAdmin, ehAdminEmail, lerPerfil, garantirPerfilAdmin,
+      initializeApp, getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut,
+      sendPasswordResetEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider,
+      doc, getDoc, setDoc, updateDoc, deleteDoc, collection, onSnapshot, serverTimestamp
+    } from "./jp-firebase.js";
+
+    const AREA = "jurispro_gest_o_processual_2_.html";
+    const portao = t => { $("portao-texto").innerHTML = t; $("portao").style.display = "block"; $("painel").style.display = "none"; };
+
+    let eu = null, meuPerfil = null, usuarios = [], editando = null, desliga = null;
+
+    if (!CONFIG_OK) {
+      portao("O Firebase ainda não foi configurado (arquivo firebase-config.js).");
+    } else {
+      onAuthStateChanged(auth, async user => {
+        if (desliga) { desliga(); desliga = null; }
+        if (!user) {
+          portao('Entre primeiro na <a href="' + AREA + '">Área Interna</a> com seu usuário de administrador e depois clique em "Administração".');
+          $("btn-sair").style.display = "none"; $("quem").textContent = "";
+          return;
+        }
+        try {
+          if (ehAdminEmail(user)) { await user.reload(); await user.getIdToken(true); }
+          let perfil = await lerPerfil(user.uid);
+          perfil = await garantirPerfilAdmin(user, perfil);
+          if (!ehAdmin(user, perfil)) { portao('Acesso restrito aos administradores. <a href="' + AREA + '">Voltar à Área Interna</a>.'); return; }
+          eu = user; meuPerfil = perfil || {};
+          $("quem").textContent = meuPerfil.nome || user.email;
+          $("btn-sair").style.display = "inline-block";
+          $("meu-usuario").value = meuPerfil.usuario || "";
+          $("portao").style.display = "none"; $("painel").style.display = "block";
+          desliga = onSnapshot(collection(db, "users"), s => {
+            usuarios = s.docs.map(d => Object.assign({ uid: d.id }, d.data()));
+            usuarios.sort((a, b) => (b.criadoEm && b.criadoEm.seconds || 0) - (a.criadoEm && a.criadoEm.seconds || 0));
+            const me = usuarios.find(u => u.uid === eu.uid); if (me) meuPerfil = me;
+            desenhar();
+          }, e => msg("msg-geral", traduz(e), "erro"));
+        } catch (e) { portao(esc(traduz(e))); }
+      });
+    }
+
+    $("btn-sair").onclick = async () => { await signOut(auth); location.href = AREA; };
+
+    // Abas
+    document.querySelectorAll(".aba").forEach(b => b.onclick = () => {
+      document.querySelectorAll(".aba").forEach(x => x.classList.toggle("ativa", x === b));
+      ["pendentes", "usuarios", "conta"].forEach(n => $("aba-" + n).style.display = b.dataset.aba === n ? "block" : "none");
+      msg("msg-geral", "");
+    });
+    $("busca").oninput = desenhar;
+    $("filtro-status").onchange = desenhar;
+
+    const selo = s => '<span class="selo s-' + esc(s) + '">' + esc(s) + "</span>";
+    function contato(u) {
+      const z = soDigitos(u.whatsapp);
+      return esc(u.email) + (z ? '<div class="mini"><a href="' + linkZap(z) + '" target="_blank" rel="noopener">WhatsApp ' + esc(u.whatsapp) + "</a></div>" : "");
+    }
+
+    function desenhar() {
+      // Pendentes
+      const pend = usuarios.filter(u => u.status === "pendente");
+      const c = $("cont-pend"); c.textContent = pend.length; c.style.display = pend.length ? "inline" : "none";
+      $("tb-pendentes").innerHTML = pend.length ? pend.map(u =>
+        "<tr><td class='mini'>" + fmtData(u.criadoEm) + "</td>" +
+        "<td><strong>" + esc(u.nome) + "</strong><div class='mini'>" + esc(u.usuario) + "</div></td>" +
+        "<td>" + contato(u) + "</td>" +
+        "<td style='white-space:pre-wrap;min-width:200px'>" + esc(u.motivo) + "</td>" +
+        "<td class='acoes'><button class='btn btn-ouro' data-acao='aprovar' data-uid='" + esc(u.uid) + "'>Aprovar</button>" +
+        "<button class='btn btn-perigo' data-acao='recusar' data-uid='" + esc(u.uid) + "'>Recusar</button></td></tr>"
+      ).join("") : "<tr><td colspan='5' class='vazio'>Nenhum pedido pendente.</td></tr>";
+
+      // Usuários
+      const q = $("busca").value.trim().toLowerCase(), f = $("filtro-status").value;
+      const lista = usuarios.filter(u => (!f || u.status === f) &&
+        (!q || [u.nome, u.usuario, u.email].some(x => String(x || "").toLowerCase().includes(q))));
+      $("tb-usuarios").innerHTML = lista.length ? lista.map(u => {
+        const sou = u.uid === eu.uid;
+        return "<tr><td><strong>" + esc(u.nome) + "</strong>" + (sou ? " <span class='mini'>(você)</span>" : "") +
+          "<div class='mini'>" + esc(u.usuario) + "</div></td>" +
+          "<td>" + contato(u) + "</td>" +
+          "<td>" + (u.perfil === "admin" ? selo("admin") : "<span class='mini'>usuário</span>") + "</td>" +
+          "<td>" + selo(u.status || "pendente") + "</td>" +
+          "<td class='mini'>" + fmtData(u.criadoEm) + "</td>" +
+          "<td class='acoes'>" +
+          (u.status === "pendente" ? "<button class='btn btn-ouro' data-acao='aprovar' data-uid='" + esc(u.uid) + "'>Aprovar</button>" : "") +
+          (!sou && u.status === "ativo" ? "<button class='btn btn-claro' data-acao='bloquear' data-uid='" + esc(u.uid) + "'>Bloquear</button>" : "") +
+          (!sou && (u.status === "bloqueado" || u.status === "recusado") ? "<button class='btn btn-claro' data-acao='ativar' data-uid='" + esc(u.uid) + "'>Reativar</button>" : "") +
+          "<button class='btn btn-claro' data-acao='editar' data-uid='" + esc(u.uid) + "'>Editar</button>" +
+          "<button class='btn btn-claro' data-acao='senha' data-uid='" + esc(u.uid) + "'>Redefinir senha</button>" +
+          (!sou ? "<button class='btn btn-perigo' data-acao='excluir' data-uid='" + esc(u.uid) + "'>Excluir</button>" : "") +
+          "</td></tr>";
+      }).join("") : "<tr><td colspan='6' class='vazio'>Nenhum usuário encontrado.</td></tr>";
+    }
+
+    // Ações das tabelas
+    document.addEventListener("click", async ev => {
+      const b = ev.target.closest("button[data-acao]"); if (!b) return;
+      const u = usuarios.find(x => x.uid === b.dataset.uid); if (!u) return;
+      const acao = b.dataset.acao;
+      if (acao === "editar") { abrirModal(u); return; }
+      b.disabled = true;
+      try {
+        if (acao === "aprovar" || acao === "ativar") {
+          await updateDoc(doc(db, "users", u.uid), { status: "ativo", aprovadoEm: serverTimestamp(), aprovadoPor: meuPerfil.usuario || eu.email });
+          const texto = "Olá, " + (u.nome || "").split(" ")[0] + "! Seu acesso à Área Interna do escritório Bergamini Advogado foi liberado.\n" +
+            "Entre em " + SITE + "/" + AREA + " com o usuário *" + u.usuario + "* e a senha que você cadastrou.";
+          const z = soDigitos(u.whatsapp);
+          msg("msg-geral", "✓ Acesso de <strong>" + esc(u.nome) + "</strong> liberado." +
+            (z ? ' <a href="' + linkZap(z, texto) + '" target="_blank" rel="noopener">Avisar pelo WhatsApp</a>' : ""), "ok", true);
+        } else if (acao === "recusar") {
+          if (!confirm("Recusar o pedido de " + u.nome + "?")) return;
+          await updateDoc(doc(db, "users", u.uid), { status: "recusado", recusadoEm: serverTimestamp(), recusadoPor: meuPerfil.usuario || eu.email });
+          msg("msg-geral", "Pedido de " + u.nome + " recusado.", "info");
+        } else if (acao === "bloquear") {
+          if (!confirm("Bloquear o acesso de " + u.nome + "?")) return;
+          await updateDoc(doc(db, "users", u.uid), { status: "bloqueado" });
+          msg("msg-geral", u.nome + " bloqueado. Ele não consegue mais entrar.", "info");
+        } else if (acao === "senha") {
+          await sendPasswordResetEmail(auth, u.email);
+          msg("msg-geral", "Enviamos para " + u.email + " um link para criar uma nova senha.", "ok");
+        } else if (acao === "excluir") {
+          if (!confirm("Excluir " + u.nome + " da lista de usuários? Ele perde o acesso.")) return;
+          await deleteDoc(doc(db, "users", u.uid));
+          if (u.usuario) await deleteDoc(doc(db, "usernames", normUsuario(u.usuario))).catch(() => {});
+          msg("msg-geral", u.nome + " excluído.", "info");
+        }
+      } catch (e) { msg("msg-geral", traduz(e), "erro"); }
+      finally { b.disabled = false; }
+    });
+
+    // Modal novo / editar
+    function abrirModal(u) {
+      editando = u || null;
+      const novo = !u;
+      $("modal-titulo").textContent = novo ? "Novo usuário" : "Editar usuário";
+      $("m-nome").value = u ? u.nome || "" : "";
+      $("m-email").value = u ? u.email || "" : "";
+      $("m-email").readOnly = !novo;
+      $("m-whatsapp").value = u ? u.whatsapp || "" : "";
+      $("m-usuario").value = u ? u.usuario || "" : "";
+      $("m-perfil").value = u ? (u.perfil || "usuario") : "usuario";
+      $("m-status").value = u ? (u.status || "pendente") : "ativo";
+      const sou = u && u.uid === eu.uid;
+      $("m-perfil").disabled = !!sou; $("m-status").disabled = !!sou;
+      $("campo-senha").style.display = novo ? "block" : "none";
+      $("m-senha").required = novo;
+      $("m-senha").value = novo ? Math.random().toString(36).slice(2, 10) : "";
+      $("m-dica").textContent = novo ? "Passe ao usuário o login e a senha provisória; ele pode trocar depois pelo \"Esqueci minha senha\"." :
+        "O e-mail de login não pode ser alterado aqui. Para trocar a senha do usuário, use \"Redefinir senha\".";
+      msg("msg-modal", "");
+      $("modal").classList.add("aberto");
+    }
+    const fecharModal = () => $("modal").classList.remove("aberto");
+    $("btn-novo").onclick = () => abrirModal(null);
+    $("modal-fechar").onclick = fecharModal;
+    $("modal-cancelar").onclick = fecharModal;
+
+    async function usuarioLivre(u, uid) {
+      const s = await getDoc(doc(db, "usernames", u));
+      return !s.exists() || s.data().uid === uid;
+    }
+
+    $("form-modal").onsubmit = async ev => {
+      ev.preventDefault();
+      const btn = $("modal-salvar"); btn.disabled = true;
+      const dados = {
+        nome: $("m-nome").value.trim(),
+        whatsapp: $("m-whatsapp").value.trim(),
+        usuario: normUsuario($("m-usuario").value),
+        perfil: $("m-perfil").value,
+        status: $("m-status").value
+      };
+      try {
+        if (!usuarioValido(dados.usuario)) throw { code: "jp/usuario-invalido" };
+        if (editando) {
+          const sou = editando.uid === eu.uid;
+          if (sou) { delete dados.perfil; delete dados.status; }
+          if (dados.usuario !== normUsuario(editando.usuario)) {
+            if (!(await usuarioLivre(dados.usuario, editando.uid))) throw { code: "jp/usuario-existe" };
+            await setDoc(doc(db, "usernames", dados.usuario), { uid: editando.uid, email: editando.email });
+            if (editando.usuario) await deleteDoc(doc(db, "usernames", normUsuario(editando.usuario))).catch(() => {});
+          }
+          await updateDoc(doc(db, "users", editando.uid), dados);
+          msg("msg-geral", "Dados de " + dados.nome + " salvos.", "ok");
+        } else {
+          const email = $("m-email").value.trim().toLowerCase(), senha = $("m-senha").value;
+          if (!(await usuarioLivre(dados.usuario, null))) throw { code: "jp/usuario-existe" };
+          // Cria a conta numa conexão separada para não deslogar o administrador
+          const sec = initializeApp(CONFIG, "novo-" + Date.now());
+          const secAuth = getAuth(sec);
+          const cred = await createUserWithEmailAndPassword(secAuth, email, senha);
+          await signOut(secAuth);
+          await setDoc(doc(db, "users", cred.user.uid), Object.assign({ email, motivo: "Cadastrado pelo administrador", criadoEm: serverTimestamp(), criadoPor: meuPerfil.usuario || eu.email }, dados));
+          await setDoc(doc(db, "usernames", dados.usuario), { uid: cred.user.uid, email });
+          const texto = "Olá, " + dados.nome.split(" ")[0] + "! Seu acesso à Área Interna do escritório Bergamini Advogado foi criado.\n" +
+            "Endereço: " + SITE + "/" + AREA + "\nUsuário: *" + dados.usuario + "*\nSenha provisória: *" + senha + "*";
+          const z = soDigitos(dados.whatsapp);
+          msg("msg-geral", "✓ Usuário <strong>" + esc(dados.usuario) + "</strong> criado. Senha provisória: <strong>" + esc(senha) + "</strong>" +
+            (z ? ' — <a href="' + linkZap(z, texto) + '" target="_blank" rel="noopener">enviar pelo WhatsApp</a>' : ""), "ok", true);
+        }
+        fecharModal();
+      } catch (e) { msg("msg-modal", traduz(e), "erro"); }
+      finally { btn.disabled = false; }
+    };
+
+    // Minha conta
+    $("form-usuario").onsubmit = async ev => {
+      ev.preventDefault();
+      const novo = normUsuario($("meu-usuario").value), atual = normUsuario(meuPerfil.usuario);
+      try {
+        if (!usuarioValido(novo)) throw { code: "jp/usuario-invalido" };
+        if (novo === atual) { msg("msg-usuario", "Nada mudou.", "info"); return; }
+        if (!(await usuarioLivre(novo, eu.uid))) throw { code: "jp/usuario-existe" };
+        await setDoc(doc(db, "usernames", novo), { uid: eu.uid, email: eu.email });
+        if (atual) await deleteDoc(doc(db, "usernames", atual)).catch(() => {});
+        await updateDoc(doc(db, "users", eu.uid), { usuario: novo });
+        msg("msg-usuario", "Pronto! Agora você entra com o usuário " + novo + ".", "ok");
+      } catch (e) { msg("msg-usuario", traduz(e), "erro"); }
+    };
+
+    $("form-senha").onsubmit = async ev => {
+      ev.preventDefault();
+      const atual = $("senha-atual").value, nova = $("senha-nova").value, nova2 = $("senha-nova2").value;
+      try {
+        if (nova !== nova2) throw { code: "jp/senhas" };
+        await reauthenticateWithCredential(eu, EmailAuthProvider.credential(eu.email, atual));
+        await updatePassword(eu, nova);
+        $("form-senha").reset();
+        msg("msg-senha", "Senha alterada.", "ok");
+      } catch (e) { msg("msg-senha", traduz(e), "erro"); }
+    };
+  </script>
+</body>
+</html>

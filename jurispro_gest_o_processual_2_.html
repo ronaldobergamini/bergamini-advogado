@@ -271,6 +271,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       border: 1px solid #d2d6dc;
       border-radius: 6px;
       color: var(--text-main);
+      font-family: inherit;
       background-color: #ffffff;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
@@ -315,6 +316,25 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       color: var(--navy);
       text-decoration: underline;
     }
+
+
+    /* Login: abas, mensagens e cadastro */
+    #view-login { align-items: flex-start; }
+    .login-card { margin: auto; }
+    .login-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.25rem; }
+    .login-tab { flex: 1; background: none; border: none; border-bottom: 3px solid transparent; padding: 0.7rem 0.5rem; font: 600 0.92rem 'Inter', sans-serif; color: #8a93a2; cursor: pointer; margin-bottom: -1px; }
+    .login-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+    .login-hint { font-size: 0.85rem; color: var(--text-sub); text-align: left; margin-bottom: 1rem; }
+    .login-msg { padding: 0.75rem; font-size: 0.875rem; border-radius: 4px; margin-bottom: 1.25rem; text-align: left; border-left: 4px solid; line-height: 1.45; }
+    .login-msg.erro { background: #fde8e8; border-color: #e02424; color: #9b1c1c; }
+    .login-msg.ok { background: #def7ec; border-color: #0a8f3c; color: #03543f; }
+    .login-msg.info { background: #eef4ff; border-color: #2563eb; color: #1e3a8a; }
+    .login-msg a { color: inherit; font-weight: 600; }
+    .link-btn { background: none; border: none; color: #64748b; font-size: 0.85rem; margin-top: 0.85rem; cursor: pointer; text-decoration: underline; }
+    .link-btn:hover { color: var(--navy); }
+    .btn-gold:disabled { opacity: 0.6; cursor: wait; }
+    #btn-admin { text-decoration: none; border-color: rgba(196,154,90,0.6); color: #f3dcb2; }
+    .badge-pend { background: #e02424; color: #fff; border-radius: 999px; font-size: 0.7rem; font-weight: 700; padding: 0 0.45rem; line-height: 1.35rem; min-width: 1.35rem; text-align: center; }
 
     /* Estrutura do Sistema */
     #app-container {
@@ -864,48 +884,34 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       }
     }
   </style>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
 </head>
 <body>
 
   <!-- ========================================== -->
-  <!-- TELA DE LOGIN (ESTADO INICIAL)              -->
+  <!-- TELA DE LOGIN / SOLICITAÇÃO DE ACESSO      -->
   <!-- ========================================== -->
-  <!-- 
-    ALTERAÇÃO DE CREDENCIAIS DE ACESSO:
-    Para alterar o usuário ou senha do sistema, edite as constantes no script abaixo:
-    - DEMO_USER: nome de usuário padrão
-    - DEMO_PASS: senha de acesso padrão
+  <!--
+    O acesso é controlado pelo Firebase (Authentication + Firestore).
+    Configuração em firebase-config.js. Administração de usuários em admin.html.
   -->
   <div id="view-login">
     <div class="login-card">
       <div class="login-logo-container">
-        <!-- SVG Logo Recriada Conforme Identidade -->
         <svg width="68" height="68" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Bergamini Advogado">
-          <!-- Estrela Superior -->
           <polygon points="50,6 52,12 58,13 53.5,17 55,23 50,19.5 45,23 46.5,17 42,13 48,12" fill="#C49A5A" />
-          <!-- Eixo Central da Balança -->
           <line x1="50" y1="23" x2="50" y2="76" stroke="#061529" stroke-width="2.5" stroke-linecap="round" />
-          <!-- Barra Transversal -->
           <line x1="22" y1="36" x2="78" y2="36" stroke="#C49A5A" stroke-width="2.2" stroke-linecap="round" />
           <circle cx="50" cy="36" r="3.5" fill="#061529" />
-          <!-- Prato Esquerdo -->
           <line x1="26" y1="36" x2="18" y2="52" stroke="#061529" stroke-width="1.2" />
           <line x1="26" y1="36" x2="34" y2="52" stroke="#061529" stroke-width="1.2" />
           <path d="M 16 52 Q 26 60 36 52 Z" fill="#C49A5A" opacity="0.9" />
-          <!-- Prato Direito -->
           <line x1="74" y1="36" x2="66" y2="52" stroke="#061529" stroke-width="1.2" />
           <line x1="74" y1="36" x2="82" y2="52" stroke="#061529" stroke-width="1.2" />
           <path d="M 64 52 Q 74 60 84 52 Z" fill="#C49A5A" opacity="0.9" />
-          <!-- Base e Arco Curvo -->
           <path d="M 28 85 Q 50 78 72 85" stroke="#C49A5A" stroke-width="2" fill="none" stroke-linecap="round" />
           <rect x="42" y="76" width="16" height="5" rx="1.5" fill="#061529" />
           <line x1="34" y1="88" x2="66" y2="88" stroke="#061529" stroke-width="2.5" stroke-linecap="round" />
         </svg>
-
         <div style="margin-top: 10px; text-align: center;">
           <span style="font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-weight: 700; letter-spacing: 2.5px; color: #061529; display: block; line-height: 1.1;">BERGAMINI</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px;">
@@ -919,59 +925,68 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       <h1 class="login-title font-serif">Área Interna</h1>
       <p class="login-subtitle">JurisPro — Gestão Processual Integrada</p>
 
-      <!-- Abas de Login/Solicitação -->
-      <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e6ea; padding-bottom: 0;">
-        <button id="tab-login-btn" class="login-tab-btn" onclick="switchLoginTab('login')" style="flex: 1; padding: 1rem 0; border: none; background: none; font-weight: 600; color: var(--navy); border-bottom: 3px solid var(--navy); cursor: pointer; font-size: 0.95rem;">Entrar</button>
-        <button id="tab-request-btn" class="login-tab-btn" onclick="switchLoginTab('request')" style="flex: 1; padding: 1rem 0; border: none; background: none; font-weight: 600; color: #999; border-bottom: 3px solid transparent; cursor: pointer; font-size: 0.95rem;">Solicitar Acesso</button>
+      <div id="cfg-aviso" class="login-msg info" style="display:none;">
+        Sistema em configuração. O acesso será liberado em breve.
       </div>
 
-      <!-- TAB 1: LOGIN -->
-      <div id="login-tab" class="login-tab-content">
-        <div id="login-error-msg" class="login-error" role="alert">
-          Usuário ou senha incorretos. Verifique suas credenciais.
-        </div>
+      <div class="login-tabs" role="tablist">
+        <button type="button" id="tab-btn-entrar" class="login-tab active" onclick="switchLoginTab('entrar')">Entrar</button>
+        <button type="button" id="tab-btn-cadastro" class="login-tab" onclick="switchLoginTab('cadastro')">Solicitar acesso</button>
+      </div>
 
+      <!-- ENTRAR -->
+      <div id="tab-entrar">
+        <div id="login-msg" class="login-msg" style="display:none;" role="alert"></div>
         <form id="form-login" onsubmit="handleLoginSubmit(event)">
-        <div class="form-group">
-          <label for="login-username">Usuário</label>
-          <input type="text" id="login-username" class="form-control" placeholder="Informe seu usuário" required autocomplete="username">
-        </div>
-        <div class="form-group">
-          <label for="login-password">Senha</label>
-          <input type="password" id="login-password" class="form-control" placeholder="••••••••••••" required autocomplete="current-password">
-        </div>
-        <button type="submit" class="btn-gold" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem;">
-          Entrar no Sistema
-        </button>
+          <div class="form-group">
+            <label for="login-username">Usuário ou e-mail</label>
+            <input type="text" id="login-username" class="form-control" placeholder="Informe seu usuário" required autocomplete="username" autocapitalize="none">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Senha</label>
+            <input type="password" id="login-password" class="form-control" placeholder="Sua senha" required autocomplete="current-password">
+          </div>
+          <button type="submit" id="btn-login" class="btn-gold" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem;">Entrar no Sistema</button>
         </form>
+        <button type="button" class="link-btn" onclick="esqueciSenha()">Esqueci minha senha</button>
       </div>
 
-      <!-- TAB 2: SOLICITAÇÃO DE ACESSO -->
-      <div id="request-tab" class="login-tab-content" style="display: none;">
-        <form id="form-request" onsubmit="handleRequestSubmit(event)">
-          <div id="request-success-msg" class="login-error" style="background-color: #def7ec; border-left-color: #0a8f3c; color: #03543f; display: none; margin-bottom: 1rem;">
-            ✓ Solicitação enviada com sucesso! Você receberá uma resposta em breve.
-          </div>
-
+      <!-- SOLICITAR ACESSO -->
+      <div id="tab-cadastro" style="display:none;">
+        <p class="login-hint">Preencha seus dados. O administrador recebe o pedido e libera o seu acesso.</p>
+        <div id="cad-msg" class="login-msg" style="display:none;" role="alert"></div>
+        <form id="form-cadastro" onsubmit="handleCadastroSubmit(event)">
           <div class="form-group">
-            <label for="req-nome">Nome Completo *</label>
-            <input type="text" id="req-nome" class="form-control" placeholder="Seu nome completo" required>
+            <label for="cad-nome">Nome completo *</label>
+            <input type="text" id="cad-nome" class="form-control" required autocomplete="name">
           </div>
           <div class="form-group">
-            <label for="req-email">E-mail *</label>
-            <input type="email" id="req-email" class="form-control" placeholder="seu@email.com.br" required>
+            <label for="cad-email">E-mail *</label>
+            <input type="email" id="cad-email" class="form-control" required autocomplete="email">
           </div>
           <div class="form-group">
-            <label for="req-empresa">Empresa / Cliente *</label>
-            <input type="text" id="req-empresa" class="form-control" placeholder="Sua empresa" required>
+            <label for="cad-whatsapp">WhatsApp (com DDD) *</label>
+            <input type="tel" id="cad-whatsapp" class="form-control" placeholder="(22) 99999-9999" required autocomplete="tel">
           </div>
           <div class="form-group">
-            <label for="req-motivo">Motivo da Solicitação *</label>
-            <textarea id="req-motivo" class="form-control" rows="3" placeholder="Por que precisa de acesso?" required></textarea>
+            <label for="cad-usuario">Nome de usuário *</label>
+            <input type="text" id="cad-usuario" class="form-control" placeholder="ex.: maria.silva" required autocapitalize="none" pattern="[A-Za-z0-9._\-]{3,30}" title="3 a 30 caracteres: letras, números, ponto, hífen ou sublinhado">
           </div>
-          <button type="submit" class="btn-gold" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem;">
-            Enviar Solicitação
-          </button>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="cad-senha">Senha *</label>
+              <input type="password" id="cad-senha" class="form-control" minlength="6" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label for="cad-senha2">Repita a senha *</label>
+              <input type="password" id="cad-senha2" class="form-control" minlength="6" required autocomplete="new-password">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cad-motivo">Motivo do acesso *</label>
+            <textarea id="cad-motivo" class="form-control" rows="2" placeholder="Ex.: estagiário, cliente, colaborador do escritório" required></textarea>
+          </div>
+          <button type="submit" id="btn-cadastro" class="btn-gold" style="width: 100%; padding: 0.8rem;">Enviar pedido de acesso</button>
         </form>
       </div>
 
@@ -1008,9 +1023,12 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
       <div class="header-user">
         <div class="user-badge">
-          <div class="user-avatar" id="avatar-initial">A</div>
-          <span class="user-name" id="header-user-name">Administrador</span>
+          <div class="user-avatar" id="avatar-initial"></div>
+          <span class="user-name" id="header-user-name"></span>
         </div>
+        <a id="btn-admin" class="btn-logout" href="admin.html" style="display:none;" title="Aprovar pedidos e gerenciar usuários">
+          Administração <span id="badge-pend" class="badge-pend" style="display:none;"></span>
+        </a>
         <button class="btn-logout" onclick="handleLogout()" title="Sair da sessão">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -1425,19 +1443,14 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
   <script>
     /*
       ===============================================================
-      CONFIGURAÇÃO DE CREDENCIAIS DE ACESSO DO SISTEMA:
-      Altere aqui o usuário e senha desejados para o login interno:
+      ACESSO: controlado pelo Firebase (ver firebase-config.js).
+      Processos e clientes ficam no Firestore e são os mesmos para
+      todos os usuários liberados. Usuários: admin.html.
       ===============================================================
     */
-    const ADMIN_USER = "ronaldo.neto";
-const ADMIN_PASS = "mhc_0203";
+    var CACHE = { processos: [], clientes: [] };
 
-    // Chaves do localStorage
-    const STORAGE_KEY_PROCESSOS = "jurispro_bergamini_processos_v1";
-    const STORAGE_KEY_CLIENTES = "jurispro_bergamini_clientes_v1";
-    const SESSION_AUTH_KEY = "jurispro_bergamini_authenticated";
-
-    // Utilitários de Data para garantir prazos dinâmicos e sempre realistas
+    // Utilitário de data (prazos relativos a hoje)
     function getOffsetDateString(days) {
       const d = new Date();
       d.setDate(d.getDate() + days);
@@ -1447,239 +1460,50 @@ const ADMIN_PASS = "mhc_0203";
       return `${y}-${m}-${day}`;
     }
 
-    // Dados Iniciais Fictícios Brasileiros para Clientes
-    const INITIAL_CLIENTES = [
-      {
-        id: "cli-1",
-        nome: "Marcos Vinicius da Silveira",
-        doc: "284.912.748-19",
-        telefone: "(11) 98342-1102",
-        email: "marcos.silveira@email.com.br"
-      },
-      {
-        id: "cli-2",
-        nome: "Construtora Horizonte Verde Ltda.",
-        doc: "19.384.921/0001-44",
-        telefone: "(11) 3450-9800",
-        email: "juridico@horizonteverde.com.br"
-      },
-      {
-        id: "cli-3",
-        nome: "Fernanda Costa Albuquerque",
-        doc: "318.492.015-88",
-        telefone: "(11) 99120-4491",
-        email: "fernanda.albuquerque@email.com.br"
-      },
-      {
-        id: "cli-4",
-        nome: "TechLog Soluções em Transporte S/A",
-        doc: "08.771.294/0001-05",
-        telefone: "(11) 4004-7711",
-        email: "diretoria@techlog.com.br"
-      }
-    ];
+    function getStoredProcessos() { return CACHE.processos.slice(); }
+    function getStoredClientes() { return CACHE.clientes.slice(); }
+    function saveStoredProcessos(lista) { syncColecao("processos", lista); }
+    function saveStoredClientes(lista) { syncColecao("clientes", lista); }
 
-    // Dados Iniciais Fictícios Brasileiros para Processos com CNJ válidos no formato
-    const INITIAL_PROCESSOS = [
-      {
-        id: "proc-1",
-        cnj: "5001284-88.2023.8.26.0100",
-        cliente: "Marcos Vinicius da Silveira",
-        area: "Direito Trabalhista",
-        status: "Ativo",
-        prazo: getOffsetDateString(2), // Esta semana
-        obs: "Manifestação sobre laudo pericial contábil e quesitos complementares."
-      },
-      {
-        id: "proc-2",
-        cnj: "1019482-12.2023.8.26.0001",
-        cliente: "Construtora Horizonte Verde Ltda.",
-        area: "Direito Imobiliário",
-        status: "Ativo",
-        prazo: getOffsetDateString(-2), // Vencido
-        obs: "Apresentação de réplica à contestação em ação de rescisão contratual."
-      },
-      {
-        id: "proc-3",
-        cnj: "0028471-55.2022.8.26.0053",
-        cliente: "TechLog Soluções em Transporte S/A",
-        area: "Direito Tributário",
-        status: "Ativo",
-        prazo: getOffsetDateString(4), // Esta semana
-        obs: "Audiência de conciliação e saneamento agendada para 14h."
-      },
-      {
-        id: "proc-4",
-        cnj: "1048293-66.2024.8.26.0100",
-        cliente: "Fernanda Costa Albuquerque",
-        area: "Direito de Família",
-        status: "Ativo",
-        prazo: getOffsetDateString(14), // Próximas semanas
-        obs: "Juntada de comprovantes de rendimentos e acordo de partilha amigável."
-      },
-      {
-        id: "proc-5",
-        cnj: "0011938-40.2023.5.02.0044",
-        cliente: "TechLog Soluções em Transporte S/A",
-        area: "Compliance",
-        status: "Suspenso",
-        prazo: getOffsetDateString(21), // Próximas semanas
-        obs: "Aguardando homologação de termo de ajustamento preliminar."
-      }
-    ];
-
-    // Carregamento de Estado do LocalStorage
-    function getStoredProcessos() {
-      const data = localStorage.getItem(STORAGE_KEY_PROCESSOS);
-      if (!data) {
-        localStorage.setItem(STORAGE_KEY_PROCESSOS, JSON.stringify(INITIAL_PROCESSOS));
-        return INITIAL_PROCESSOS;
-      }
-      try {
-        return JSON.parse(data);
-      } catch (e) {
-        return INITIAL_PROCESSOS;
-      }
-    }
-
-    function saveStoredProcessos(processos) {
-      localStorage.setItem(STORAGE_KEY_PROCESSOS, JSON.stringify(processos));
+    // Grava no servidor só o que mudou (novos, editados e excluídos)
+    function syncColecao(nome, lista) {
+      const antes = CACHE[nome];
+      CACHE[nome] = lista.slice();
       refreshAll();
-    }
-
-    function getStoredClientes() {
-      const data = localStorage.getItem(STORAGE_KEY_CLIENTES);
-      if (!data) {
-        localStorage.setItem(STORAGE_KEY_CLIENTES, JSON.stringify(INITIAL_CLIENTES));
-        return INITIAL_CLIENTES;
-      }
-      try {
-        return JSON.parse(data);
-      } catch (e) {
-        return INITIAL_CLIENTES;
-      }
-    }
-
-    function saveStoredClientes(clientes) {
-      localStorage.setItem(STORAGE_KEY_CLIENTES, JSON.stringify(clientes));
-      refreshAll();
-    }
-
-    // Troca de Abas de Login
-    function switchLoginTab(tab) {
-      document.getElementById('login-tab').style.display = tab === 'login' ? 'block' : 'none';
-      document.getElementById('request-tab').style.display = tab === 'request' ? 'block' : 'none';
-      
-      document.getElementById('tab-login-btn').style.color = tab === 'login' ? 'var(--navy)' : '#999';
-      document.getElementById('tab-login-btn').style.borderBottom = tab === 'login' ? '3px solid var(--navy)' : '3px solid transparent';
-      
-      document.getElementById('tab-request-btn').style.color = tab === 'request' ? 'var(--navy)' : '#999';
-      document.getElementById('tab-request-btn').style.borderBottom = tab === 'request' ? '3px solid var(--navy)' : '3px solid transparent';
-    }
-
-    // Enviar Solicitação de Acesso
-    function handleRequestSubmit(e) {
-      e.preventDefault();
-      const nome = document.getElementById("req-nome").value.trim();
-      const email = document.getElementById("req-email").value.trim();
-      const empresa = document.getElementById("req-empresa").value.trim();
-      const motivo = document.getElementById("req-motivo").value.trim();
-      const successMsg = document.getElementById("request-success-msg");
-      const errorMsg = document.getElementById("request-error-msg");
-
-      // Dados da solicitação
-      const solicitacao = {
-        id: "sol-" + Date.now(),
-        nome,
-        email,
-        empresa,
-        motivo,
-        data: new Date().toLocaleString('pt-BR'),
-        status: "pendente"
-      };
-
-      // Armazenar localmente
-      let solicitacoes = JSON.parse(localStorage.getItem('jurispro_solicitacoes') || '[]');
-      solicitacoes.push(solicitacao);
-      localStorage.setItem('jurispro_solicitacoes', JSON.stringify(solicitacoes));
-
-      // Enviar para Formspree (envio de email)
-      const formData = new FormData();
-      formData.append('nome', nome);
-      formData.append('email', email);
-      formData.append('empresa', empresa);
-      formData.append('motivo', motivo);
-      formData.append('data', solicitacao.data);
-
-      fetch('https://formspree.io/f/xyzdefgh', {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      })
-      .then(response => {
-        if (response.ok) {
-          successMsg.style.display = 'block';
-          errorMsg.style.display = 'none';
-          document.getElementById("form-request").reset();
-          // Voltar para aba de login após 3 segundos
-          setTimeout(() => {
-            switchLoginTab('login');
-            successMsg.style.display = 'none';
-          }, 3000);
-        } else {
-          throw new Error('Erro ao enviar');
-        }
-      })
-      .catch(error => {
-        // Mostrar mensagem mesmo com erro (dados foram salvos localmente)
-        successMsg.style.display = 'block';
-        errorMsg.style.display = 'none';
-        document.getElementById("form-request").reset();
-        setTimeout(() => {
-          switchLoginTab('login');
-          successMsg.style.display = 'none';
-        }, 3000);
+      if (!window.JP) { alert("Sem conexão com o servidor. A alteração não foi salva."); return; }
+      const mapaAntes = new Map(antes.map(x => [x.id, JSON.stringify(x)]));
+      const ids = new Set(lista.map(x => x.id));
+      lista.forEach(x => {
+        if (mapaAntes.get(x.id) !== JSON.stringify(x)) window.JP.salvar(nome, x).catch(erroSalvar);
+      });
+      antes.forEach(x => {
+        if (!ids.has(x.id)) window.JP.excluir(nome, x.id).catch(erroSalvar);
       });
     }
 
-    // Autenticação & Sessão
-    function checkAuth() {
-      const isAuth = sessionStorage.getItem(SESSION_AUTH_KEY) === "true";
-      const loginView = document.getElementById("view-login");
-      const appView = document.getElementById("app-container");
-
-      if (isAuth) {
-        loginView.style.display = "none";
-        appView.style.display = "flex";
-        refreshAll();
-      } else {
-        loginView.style.display = "flex";
-        appView.style.display = "none";
-      }
+    function erroSalvar(e) {
+      console.error(e);
+      alert("Não foi possível salvar no servidor (" + (e.code || e.message) + "). Tente novamente.");
     }
 
-    function handleLoginSubmit(e) {
-      e.preventDefault();
-      const user = document.getElementById("login-username").value.trim();
-      const pass = document.getElementById("login-password").value.trim();
-      const errorMsg = document.getElementById("login-error-msg");
-
-      if (user === ADMIN_USER && pass === ADMIN_PASS) {
-        sessionStorage.setItem(SESSION_AUTH_KEY, "true");
-        errorMsg.style.display = "none";
-        document.getElementById("form-login").reset();
-        checkAuth();
-      } else {
-        errorMsg.style.display = "block";
-      }
+    // Abas da tela de login
+    function switchLoginTab(tab) {
+      const entrar = tab === "entrar";
+      document.getElementById("tab-entrar").style.display = entrar ? "block" : "none";
+      document.getElementById("tab-cadastro").style.display = entrar ? "none" : "block";
+      document.getElementById("tab-btn-entrar").classList.toggle("active", entrar);
+      document.getElementById("tab-btn-cadastro").classList.toggle("active", !entrar);
     }
 
-    function handleLogout() {
-      if (confirm("Deseja realmente sair da Área Interna?")) {
-        sessionStorage.removeItem(SESSION_AUTH_KEY);
-        checkAuth();
-      }
+    // Substituídas pelo módulo Firebase ao carregar; ficam como aviso se ele falhar
+    function avisoSemServidor(e) {
+      if (e) e.preventDefault();
+      alert("O sistema não conseguiu se conectar ao servidor. Verifique sua internet e recarregue a página.");
     }
+    function handleLoginSubmit(e) { avisoSemServidor(e); }
+    function handleCadastroSubmit(e) { avisoSemServidor(e); }
+    function esqueciSenha() { avisoSemServidor(); }
+    function handleLogout() { avisoSemServidor(); }
 
     // Navegação entre Telas
     function switchNav(sectionName, element) {
@@ -2137,10 +1961,198 @@ const ADMIN_PASS = "mhc_0203";
         .replace(/'/g, "&#039;");
     }
 
-    // Inicialização ao Carregar o Documento
-    document.addEventListener("DOMContentLoaded", () => {
-      checkAuth();
-    });
+  </script>
+  <!-- ========================================== -->
+  <!-- ACESSO E DADOS NO FIREBASE                 -->
+  <!-- ========================================== -->
+  <script src="firebase-config.js"></script>
+  <script type="module">
+    import {
+      CONFIG_OK, auth, db, ADMIN_EMAIL, ADMIN_USUARIO, ZAP_ADMIN, SITE, $, msg, traduz,
+      normUsuario, usuarioValido, soDigitos, linkZap, ehAdmin, ehAdminEmail, emailDoLogin,
+      lerPerfil, garantirPerfilAdmin, avisarEmail, reservarAba, enviarAba,
+      onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut,
+      sendPasswordResetEmail, sendEmailVerification, doc, getDoc, setDoc, deleteDoc,
+      collection, onSnapshot, query, where, serverTimestamp
+    } from "./jp-firebase.js";
+
+    const appView = $("app-container"), loginView = $("view-login");
+
+    function mostrarLogin() {
+      loginView.style.display = "flex";
+      appView.style.display = "none";
+      CACHE.processos = []; CACHE.clientes = [];
+    }
+
+    if (!CONFIG_OK) {
+      $("cfg-aviso").style.display = "block";
+      mostrarLogin();
+    } else {
+      let cadastrando = false;
+      let assinaturas = [];
+      const ordem = (a, b) => (parseInt(String(b.id).replace(/\D/g, "")) || 0) - (parseInt(String(a.id).replace(/\D/g, "")) || 0);
+
+      window.JP = {
+        salvar: (col, x) => setDoc(doc(db, col, x.id), x),
+        excluir: (col, id) => deleteDoc(doc(db, col, id))
+      };
+
+      function mostrarApp(user, perfil, admin) {
+        const nome = (perfil && perfil.nome) || user.email;
+        $("header-user-name").textContent = nome;
+        $("avatar-initial").textContent = (nome || "?").trim().charAt(0).toUpperCase();
+        $("btn-admin").style.display = admin ? "inline-flex" : "none";
+        loginView.style.display = "none";
+        appView.style.display = "flex";
+        const erro = e => { console.error(e); alert("Erro ao carregar dados: " + traduz(e)); };
+        assinaturas.push(onSnapshot(collection(db, "processos"), s => {
+          CACHE.processos = s.docs.map(d => d.data()).sort(ordem); refreshAll();
+        }, erro));
+        assinaturas.push(onSnapshot(collection(db, "clientes"), s => {
+          CACHE.clientes = s.docs.map(d => d.data()).sort(ordem); refreshAll();
+        }, erro));
+        if (admin) {
+          assinaturas.push(onSnapshot(query(collection(db, "users"), where("status", "==", "pendente")), s => {
+            const n = s.size, b = $("badge-pend");
+            b.textContent = n; b.style.display = n ? "inline-block" : "none";
+          }, () => {}));
+        }
+        refreshAll();
+      }
+
+      onAuthStateChanged(auth, async user => {
+        if (cadastrando) return;
+        assinaturas.forEach(f => f()); assinaturas = [];
+        if (!user) { mostrarLogin(); return; }
+        try {
+          if (ehAdminEmail(user)) { await user.reload(); await user.getIdToken(true); }
+          if (ehAdminEmail(user) && !user.emailVerified) {
+            await sendEmailVerification(user).catch(() => {});
+            await signOut(auth);
+            msg("login-msg", "Confirme seu e-mail: enviamos um link para " + ADMIN_EMAIL + ". Clique nele e depois entre aqui de novo.", "info");
+            return;
+          }
+          let perfil = await lerPerfil(user.uid);
+          perfil = await garantirPerfilAdmin(user, perfil);
+          const admin = ehAdmin(user, perfil);
+          if (!admin && (!perfil || perfil.status !== "ativo")) {
+            const st = perfil ? perfil.status : "pendente";
+            await signOut(auth);
+            msg("login-msg",
+              st === "recusado" ? "Seu pedido de acesso não foi aprovado." :
+              st === "bloqueado" ? "Seu acesso está bloqueado. Fale com o administrador." :
+              "Seu cadastro ainda aguarda a aprovação do administrador.", "info");
+            return;
+          }
+          msg("login-msg", "");
+          mostrarApp(user, perfil, admin);
+        } catch (e) {
+          console.error(e);
+          await signOut(auth).catch(() => {});
+          msg("login-msg", traduz(e), "erro");
+        }
+      });
+
+      window.handleLoginSubmit = async e => {
+        e.preventDefault();
+        const btn = $("btn-login");
+        const login = $("login-username").value, senha = $("login-password").value;
+        btn.disabled = true; msg("login-msg", "Entrando...", "info");
+        try {
+          const email = await emailDoLogin(login);
+          if (!email) throw { code: "auth/invalid-credential" };
+          try {
+            await signInWithEmailAndPassword(auth, email, senha);
+          } catch (err) {
+            // Primeira entrada do administrador principal: cria a conta dele
+            const semConta = ["auth/invalid-credential", "auth/user-not-found", "auth/invalid-login-credentials"].includes(err.code);
+            if (email === ADMIN_EMAIL && semConta) {
+              cadastrando = true;
+              try {
+                const cred = await createUserWithEmailAndPassword(auth, email, senha);
+                await sendEmailVerification(cred.user);
+                await signOut(auth);
+                msg("login-msg", "Conta de administrador criada. Enviamos um e-mail de confirmação para " + ADMIN_EMAIL + ". Abra o e-mail, clique no link e depois entre aqui de novo com o mesmo usuário e senha.", "ok");
+                return;
+              } catch (e2) {
+                if (e2.code === "auth/email-already-in-use") throw err;
+                throw e2;
+              } finally { cadastrando = false; }
+            }
+            throw err;
+          }
+          $("form-login").reset();
+        } catch (err) {
+          msg("login-msg", traduz(err), "erro");
+        } finally { btn.disabled = false; }
+      };
+
+      window.esqueciSenha = async () => {
+        const login = $("login-username").value;
+        if (!login.trim()) { msg("login-msg", "Digite seu usuário ou e-mail no campo acima e clique de novo em \"Esqueci minha senha\".", "info"); return; }
+        try {
+          const email = await emailDoLogin(login);
+          if (email) await sendPasswordResetEmail(auth, email);
+          msg("login-msg", "Se o usuário existir, enviamos um link para criar nova senha no e-mail cadastrado.", "ok");
+        } catch (err) { msg("login-msg", traduz(err), "erro"); }
+      };
+
+      window.handleLogout = async () => {
+        if (confirm("Deseja realmente sair da Área Interna?")) await signOut(auth);
+      };
+
+      window.handleCadastroSubmit = async e => {
+        e.preventDefault();
+        const nome = $("cad-nome").value.trim();
+        const email = $("cad-email").value.trim().toLowerCase();
+        const whatsapp = $("cad-whatsapp").value.trim();
+        const usuario = normUsuario($("cad-usuario").value);
+        const senha = $("cad-senha").value, senha2 = $("cad-senha2").value;
+        const motivo = $("cad-motivo").value.trim();
+        const btn = $("btn-cadastro");
+        try {
+          if (!usuarioValido(usuario)) throw { code: "jp/usuario-invalido" };
+          if (senha !== senha2) throw { code: "jp/senhas" };
+          if (soDigitos(whatsapp).length < 10) throw { code: "jp/whatsapp" };
+        } catch (err) { msg("cad-msg", traduz(err), "erro"); return; }
+
+        const aba = ZAP_ADMIN ? reservarAba() : null;
+        btn.disabled = true; msg("cad-msg", "Enviando...", "info");
+        try {
+          if (usuario === ADMIN_USUARIO || (await getDoc(doc(db, "usernames", usuario))).exists()) throw { code: "jp/usuario-existe" };
+          cadastrando = true;
+          const cred = await createUserWithEmailAndPassword(auth, email, senha);
+          await setDoc(doc(db, "users", cred.user.uid), {
+            nome, email, whatsapp, usuario, motivo,
+            perfil: "usuario", status: "pendente", criadoEm: serverTimestamp()
+          });
+          await setDoc(doc(db, "usernames", usuario), { uid: cred.user.uid, email });
+          await signOut(auth);
+
+          const painel = SITE + "/admin.html";
+          avisarEmail({
+            _subject: "Novo pedido de acesso – JurisPro Bergamini",
+            Nome: nome, Usuario: usuario, Email: email, WhatsApp: whatsapp, Motivo: motivo,
+            Aprovar: painel
+          });
+          let extra = "";
+          if (ZAP_ADMIN) {
+            const texto = "*Novo pedido de acesso — JurisPro Bergamini*\n" +
+              "Nome: " + nome + "\nUsuário: " + usuario + "\nE-mail: " + email +
+              "\nWhatsApp: " + whatsapp + "\nMotivo: " + motivo + "\n\nAprovar em: " + painel;
+            const url = linkZap(ZAP_ADMIN, texto);
+            enviarAba(aba, url);
+            extra = '<br><br>Para agilizar, <strong>envie a mensagem que abriu no WhatsApp</strong>. Se não abriu, <a href="' + url + '" target="_blank" rel="noopener">clique aqui</a>.';
+          }
+          $("form-cadastro").reset();
+          msg("cad-msg", "Pedido enviado! Você poderá entrar assim que o administrador aprovar o seu acesso." + extra, "ok", true);
+        } catch (err) {
+          if (aba && !aba.closed) aba.close();
+          await signOut(auth).catch(() => {});
+          msg("cad-msg", traduz(err), "erro");
+        } finally { cadastrando = false; btn.disabled = false; }
+      };
+    }
   </script>
 <script>
 /* Skip artifact shell — fixed helpers served beside every artifact. */
