@@ -1,21 +1,19 @@
 /* ============================================================
    CONFIGURAÇÃO DO FIREBASE — Bergamini Advogado (projeto bergamini-advogado)
-   Cole aqui os dados do app Web do Firebase:
-   Console > Configurações do projeto > Seus apps > App da Web > Configuração
    ============================================================ */
 window.FIREBASE_CONFIG = {
-  apiKey:            "COLE_AQUI_A_API_KEY",
+  apiKey:            "AIzaSyAER0e6pww5ayH47JQKjnacQW65GwRj6UU",
   authDomain:        "bergamini-advogado.firebaseapp.com",
   projectId:         "bergamini-advogado",
   storageBucket:     "bergamini-advogado.firebasestorage.app",
-  messagingSenderId: "COLE_AQUI",
-  appId:             "COLE_AQUI"
+  messagingSenderId: "285796759099",
+  appId:             "1:285796759099:web:a87875c2feb644e3744e1e",
+  measurementId:     "G-QEFF7TRVVT"
 };
 
-/* Administrador principal (tem controle total).
-   O e-mail precisa ser IGUAL ao da regra admin() no Firestore. */
+/* Administrador principal (tem controle total) */
 window.ADMIN_EMAIL    = "ronaldobergamini.advogado@gmail.com";
 window.ADMIN_USUARIO  = "ronaldo.neto";
 
-/* WhatsApp que recebe o aviso de cada novo pedido de acesso (com DDI e DDD) */
+/* WhatsApp que recebe o aviso de cada novo pedido de acesso */
 window.WHATSAPP_ADMIN = "5522981740300";
