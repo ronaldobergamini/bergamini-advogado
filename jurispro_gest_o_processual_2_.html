@@ -1189,7 +1189,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
           <!-- 4 Cartões KPI -->
           <div class="kpi-row">
-            <div class="kpi-card">
+            <div class="kpi-card clickable" onclick="abrirProcessosAtivos()" title="Ver todos os processos ativos">
               <div class="kpi-icon-wrap">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
               </div>
@@ -1199,7 +1199,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card clickable" onclick="abrirPrazosSemana()" title="Ver os prazos desta semana">
               <div class="kpi-icon-wrap">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               </div>
@@ -1370,7 +1370,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             </div>
 
             <!-- Esta semana -->
-            <div class="urgency-section urgency-semana">
+            <div class="urgency-section urgency-semana" id="bloco-prazos-semana">
               <div class="urgency-header">
                 <span class="urgency-dot"></span>
                 <span>Prazo Esta Semana (<span id="count-semana">0</span>)</span>
@@ -2934,6 +2934,21 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       saveStoredClientes(juntar(getStoredClientes(), cl));
       saveStoredProcessos(juntar(getStoredProcessos(), pr));
       alert("Restauração enviada para a nuvem.");
+    }
+
+    // Cartões do Início que abrem a informação completa
+    function abrirProcessosAtivos() {
+      document.getElementById("search-processos").value = "";
+      document.getElementById("filter-status").value = "Ativo";
+      renderProcessosTable();
+      switchNav("processos");
+    }
+    function abrirPrazosSemana() {
+      switchNav("prazos");
+      setTimeout(() => {
+        const el = document.getElementById("bloco-prazos-semana");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 120);
     }
 
     // Classes utilitárias de badge
