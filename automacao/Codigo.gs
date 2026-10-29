@@ -7,7 +7,7 @@
                               publicações no Comunica PJe (OAB e processos)
      • Toda sexta ~8h ....... resumo das tarefas de seg a sex da semana
                               seguinte para o advogado
-     • Todo domingo ~3h ..... cópia de segurança dos dados no Google Drive
+     • Todo domingo ~3h ..... cópia de segurança dos dados no OneDrive
 
    COMO INSTALAR: veja o arquivo LEIA-ME.md nesta mesma pasta.
    Depois de colar, rode UMA vez a função  instalar  (menu Executar).
@@ -25,7 +25,9 @@ const CFG = {
   fuso: "America/Sao_Paulo",
   diasAntesAudiencia: 2,
   pastaBackup: "Backups JurisPro Bergamini",
-  manterBackups: 12          // quantas cópias semanais guardar no Drive
+  manterBackups: 12,         // quantas cópias semanais guardar no OneDrive
+  // ID do aplicativo registrado no Azure (veja o LEIA-ME). Cole entre as aspas.
+  msClientId: "COLE_AQUI_O_ID_DO_APLICATIVO"
 };
 
 /* ============================ INSTALAÇÃO ============================ */
@@ -35,7 +37,7 @@ function instalar() {
   ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger("rotinaDiaria").timeBased().everyDays(1).atHour(7).inTimezone(CFG.fuso).create();
   ScriptApp.newTrigger("resumoSemanal").timeBased().onWeekDay(ScriptApp.WeekDay.FRIDAY).atHour(8).inTimezone(CFG.fuso).create();
-  ScriptApp.newTrigger("backupSemanal").timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(3).inTimezone(CFG.fuso).create();
+  ScriptApp.newTrigger("rotinaBackup").timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(3).inTimezone(CFG.fuso).create();
   // Teste de leitura do banco para já pedir as autorizações
   const n = lerColecao("processos").length;
   Logger.log("Instalado. Processos encontrados no banco: " + n);
@@ -48,6 +50,10 @@ function testarEnvio() {
 }
 
 /* ============================ ROTINAS ============================ */
+
+function rotinaBackup() {
+  try { backupSemanal(); } catch (e) { avisarErro("backup no OneDrive", e); }
+}
 
 function rotinaDiaria() {
   try { lembretesAudiencia(); } catch (e) { avisarErro("lembretes de audiência", e); }
@@ -187,7 +193,67 @@ function verificarPublicacoes() {
   props.setProperty("pubVistas", JSON.stringify(vistas));
 }
 
-/* ============================ BACKUP ============================ */
+/* ============================ BACKUP (OneDrive) ============================ */
+/* Grava direto no OneDrive pela API da Microsoft (Graph).
+   Autorização feita UMA vez: rode  autorizarOneDrive  e depois  concluirAutorizacaoOneDrive. */
+
+const MS_ESCOPO = "Files.ReadWrite offline_access";
+const MS_AUTH = "https://login.microsoftonline.com/common/oauth2/v2.0/";
+const MS_GRAPH = "https://graph.microsoft.com/v1.0";
+
+/** PASSO 1: pede um código de autorização e envia ao e-mail do advogado. */
+function autorizarOneDrive() {
+  exigirClientId();
+  const r = UrlFetchApp.fetch(MS_AUTH + "devicecode", {
+    method: "post", muteHttpExceptions: true,
+    payload: { client_id: CFG.msClientId, scope: MS_ESCOPO }
+  });
+  const j = JSON.parse(r.getContentText());
+  if (r.getResponseCode() !== 200) throw new Error("Microsoft: " + (j.error_description || r.getContentText()).slice(0, 400));
+  PropertiesService.getScriptProperties().setProperty("msDeviceCode", j.device_code);
+  const msg = "1) Abra  " + j.verification_uri + "\n2) Digite o código:  " + j.user_code +
+    "\n3) Entre com a conta Microsoft (OneDrive) do escritório e aceite.\n4) Volte ao Apps Script e rode  concluirAutorizacaoOneDrive.\n\nO código vale por " + Math.round(j.expires_in / 60) + " minutos.";
+  Logger.log(msg);
+  MailApp.sendEmail(CFG.emailAdvogado, "JurisPro — código para autorizar o OneDrive: " + j.user_code, msg);
+}
+
+/** PASSO 2: depois de autorizar no site da Microsoft, guarda a permissão e faz o primeiro backup. */
+function concluirAutorizacaoOneDrive() {
+  exigirClientId();
+  const dc = PropertiesService.getScriptProperties().getProperty("msDeviceCode");
+  if (!dc) throw new Error("Rode primeiro a função autorizarOneDrive.");
+  const r = UrlFetchApp.fetch(MS_AUTH + "token", {
+    method: "post", muteHttpExceptions: true,
+    payload: { grant_type: "urn:ietf:params:oauth:grant-type:device_code", client_id: CFG.msClientId, device_code: dc }
+  });
+  const j = JSON.parse(r.getContentText());
+  if (j.error === "authorization_pending") { Logger.log("Ainda não autorizado. Conclua o passo no site da Microsoft e rode de novo."); return; }
+  if (!j.refresh_token) throw new Error("Falha: " + (j.error_description || r.getContentText()).slice(0, 400));
+  const props = PropertiesService.getScriptProperties();
+  props.setProperty("msRefreshToken", j.refresh_token);
+  props.deleteProperty("msDeviceCode");
+  Logger.log("OneDrive autorizado. Fazendo o primeiro backup...");
+  backupSemanal();
+  Logger.log("Pronto: veja a pasta '" + CFG.pastaBackup + "' no OneDrive.");
+}
+
+function exigirClientId() {
+  if (!CFG.msClientId || /COLE_AQUI/.test(CFG.msClientId)) throw new Error("Cole o ID do aplicativo Azure em CFG.msClientId (veja o LEIA-ME).");
+}
+
+function tokenOneDrive() {
+  const props = PropertiesService.getScriptProperties();
+  const rt = props.getProperty("msRefreshToken");
+  if (!rt) throw new Error("OneDrive ainda não autorizado. Rode autorizarOneDrive e depois concluirAutorizacaoOneDrive.");
+  const r = UrlFetchApp.fetch(MS_AUTH + "token", {
+    method: "post", muteHttpExceptions: true,
+    payload: { grant_type: "refresh_token", client_id: CFG.msClientId, refresh_token: rt, scope: MS_ESCOPO }
+  });
+  const j = JSON.parse(r.getContentText());
+  if (!j.access_token) throw new Error("Autorização do OneDrive expirou ou foi revogada — repita autorizarOneDrive. (" + (j.error_description || "").slice(0, 200) + ")");
+  if (j.refresh_token) props.setProperty("msRefreshToken", j.refresh_token);   // a Microsoft renova a cada uso
+  return j.access_token;
+}
 
 function backupSemanal() {
   const dados = {
@@ -196,15 +262,25 @@ function backupSemanal() {
     clientes: lerColecao("clientes"),
     processos: lerColecao("processos")
   };
-  const pastas = DriveApp.getFoldersByName(CFG.pastaBackup);
-  const pasta = pastas.hasNext() ? pastas.next() : DriveApp.createFolder(CFG.pastaBackup);
-  pasta.createFile("jurispro-backup-" + hojeISO() + ".json", JSON.stringify(dados, null, 2), "application/json");
+  const token = tokenOneDrive();
+  const H = { Authorization: "Bearer " + token };
+  const pasta = encodeURIComponent(CFG.pastaBackup);
+  const nome = "jurispro-backup-" + hojeISO() + ".json";
+
+  const up = UrlFetchApp.fetch(MS_GRAPH + "/me/drive/root:/" + pasta + "/" + nome + ":/content", {
+    method: "put", contentType: "application/json", headers: H,
+    payload: JSON.stringify(dados, null, 2), muteHttpExceptions: true
+  });
+  if (up.getResponseCode() >= 300) throw new Error("OneDrive (gravar): HTTP " + up.getResponseCode() + " " + up.getContentText().slice(0, 300));
+
   // Mantém só os mais recentes
-  const arqs = [];
-  const it = pasta.getFiles();
-  while (it.hasNext()) arqs.push(it.next());
-  arqs.sort((a, b) => b.getDateCreated() - a.getDateCreated());
-  arqs.slice(CFG.manterBackups).forEach(f => f.setTrashed(true));
+  const ls = UrlFetchApp.fetch(MS_GRAPH + "/me/drive/root:/" + pasta + ":/children?$select=id,name,createdDateTime&$top=200", { headers: H, muteHttpExceptions: true });
+  if (ls.getResponseCode() === 200) {
+    const arqs = (JSON.parse(ls.getContentText()).value || []).filter(f => /^jurispro-backup-.*\.json$/.test(f.name));
+    arqs.sort((a, b) => b.name.localeCompare(a.name));
+    arqs.slice(CFG.manterBackups).forEach(f =>
+      UrlFetchApp.fetch(MS_GRAPH + "/me/drive/items/" + f.id, { method: "delete", headers: H, muteHttpExceptions: true }));
+  }
 }
 
 /* ============================ E-MAILS ============================ */
