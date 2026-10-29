@@ -16,4 +16,4 @@ window.ADMIN_EMAIL    = "ronaldobergamini.advogado@gmail.com";
 window.ADMIN_USUARIO  = "ronaldo.neto";
 
 /* WhatsApp que recebe o aviso de cada novo pedido de acesso */
-window.WHATSAPP_ADMIN = "5522981740300";
+window.WHATSAPP_ADMIN = "5521998075723";

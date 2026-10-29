@@ -851,8 +851,90 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       gap: 1rem;
     }
 
+    /* ===== Melhorias 2026-10 ===== */
+    .sync-status { font-size: 0.78rem; padding: 0.25rem 0.6rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap; }
+    .sync-status.ok { color: #a7f3d0; }
+    .sync-status.salvando { color: #fde68a; }
+    .sync-status.erro { color: #fecaca; border-color: #f87171; }
+    @media (max-width: 860px) { .sync-status { display: none; } }
+    .form-section {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem 1rem 0.25rem;
+      margin: 0.5rem 0 1.25rem;
+      background: #fbfcfd;
+    }
+    .form-section-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.75rem;
+    }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    .yesno { display: inline-flex; border: 1px solid #d2d6dc; border-radius: 6px; overflow: hidden; }
+    .yesno button {
+      background: #fff; border: none; padding: 0.5rem 1.1rem; font-size: 0.88rem;
+      font-weight: 600; color: var(--text-sub); cursor: pointer; font-family: inherit;
+    }
+    .yesno button + button { border-left: 1px solid #d2d6dc; }
+    .yesno button.on { background: var(--navy); color: #fff; }
+    .yesno-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.9rem; flex-wrap: wrap; }
+    .yesno-row .q { font-size: 0.9rem; font-weight: 600; color: var(--navy); }
+    .reveal { display: none; }
+    .reveal.show { display: block; }
+    .hint { font-size: 0.78rem; color: var(--text-sub); margin-top: 0.3rem; }
+
+    .kpi-card.clickable { cursor: pointer; transition: box-shadow 0.15s, transform 0.15s; }
+    .kpi-card.clickable:hover { box-shadow: 0 6px 16px rgba(6,21,41,0.08); transform: translateY(-1px); }
+    .kpi-card.clickable .kpi-text::after { content: " ›"; color: var(--gold); }
+
+    .tipo-tag {
+      display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 4px; margin-right: 0.4rem;
+      vertical-align: middle;
+    }
+    .tipo-prazo { background: #fef3c7; color: #92400e; }
+    .tipo-audiencia { background: #e0e7ff; color: #3730a3; }
+    .tag-cumprido { background: #def7ec; color: #03543f; }
+
+    .deadline-card { flex-wrap: wrap; gap: 0.75rem; }
+    .deadline-card.feito { opacity: 0.75; background: #f8fafc; }
+    .deadline-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .cumprido-box {
+      flex-basis: 100%; border-top: 1px dashed var(--border-color); padding-top: 0.75rem; margin-top: 0.25rem;
+    }
+    .cumprido-box .yesno-row { margin-bottom: 0.6rem; }
+    .obs-feito { font-size: 0.82rem; color: #03543f; margin-top: 0.3rem; }
+
+    .filtro-periodo { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .filtro-periodo .form-group { margin-bottom: 0; }
+    .tab-pills { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tab-pills button {
+      background: #fff; border: 1px solid var(--border-color); border-radius: 999px;
+      padding: 0.4rem 0.95rem; font-size: 0.85rem; cursor: pointer; font-family: inherit; color: var(--text-sub);
+    }
+    .tab-pills button.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .tarefas-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .tarefa-linha {
+      display: flex; justify-content: space-between; gap: 0.75rem; padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border-color); font-size: 0.88rem;
+    }
+    .tarefa-linha:last-child { border-bottom: none; }
+    .tarefa-data { font-weight: 600; color: var(--navy); white-space: nowrap; }
+    .tarefa-vencida .tarefa-data { color: #c81e1e; }
+
+    .pub-resultados { max-height: 50vh; overflow-y: auto; }
+    .pub-item { border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem 0.9rem; margin-bottom: 0.6rem; font-size: 0.85rem; }
+    .pub-item .pub-cab { font-weight: 600; color: var(--navy); margin-bottom: 0.25rem; }
+    .pub-item .pub-txt { color: var(--text-main); white-space: pre-wrap; max-height: 9rem; overflow: hidden; }
+    .pub-botoes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0; }
+    .aviso-box { background: #fffbeb; border: 1px solid #fde68a; color: #78350f; border-radius: 6px; padding: 0.7rem 0.9rem; font-size: 0.84rem; }
+
     /* Responsividade */
     @media (max-width: 860px) {
+      .grid-3, .tarefas-cols, .pub-botoes { grid-template-columns: 1fr; }
+      .grid-dashboard { grid-template-columns: 1fr !important; }
       .app-body {
         flex-direction: column;
       }
@@ -1022,6 +1104,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       </div>
 
       <div class="header-user">
+        <span id="sync-status" class="sync-status ok" title="Tudo o que você cadastra é salvo automaticamente na nuvem">☁ Salvo na nuvem</span>
         <div class="user-badge">
           <div class="user-avatar" id="avatar-initial"></div>
           <span class="user-name" id="header-user-name"></span>
@@ -1064,9 +1147,21 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             </a>
           </li>
           <li>
+            <a class="sidebar-link" onclick="switchNav('tarefas', this)">
+              <svg class="sidebar-icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              Tarefas Pendentes
+            </a>
+          </li>
+          <li>
             <a class="sidebar-link" onclick="switchNav('clientes', this)">
               <svg class="sidebar-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               Clientes
+            </a>
+          </li>
+          <li>
+            <a class="sidebar-link" onclick="switchNav('dados', this)">
+              <svg class="sidebar-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Salvar / Exportar
             </a>
           </li>
         </ul>
@@ -1114,22 +1209,22 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card clickable" onclick="switchNav('prazos'); setTimeout(() => { const el = document.getElementById('bloco-audiencias'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 80);" title="Ver audiências agendadas">
               <div class="kpi-icon-wrap">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5h-2v-2h2zm0-4.5h-2V7h2z"></path></svg>
               </div>
               <div>
-                <div class="kpi-num" id="kpi-audiencias">2</div>
+                <div class="kpi-num" id="kpi-audiencias">0</div>
                 <div class="kpi-text">Audiências Agendadas</div>
               </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card clickable" onclick="switchNav('tarefas')" title="Abrir tarefas pendentes">
               <div class="kpi-icon-wrap">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
               </div>
               <div>
-                <div class="kpi-num" id="kpi-tarefas">5</div>
+                <div class="kpi-num" id="kpi-tarefas">0</div>
                 <div class="kpi-text">Tarefas Pendentes</div>
               </div>
             </div>
@@ -1211,7 +1306,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
                     <th>Cliente</th>
                     <th>Área</th>
                     <th>Status</th>
-                    <th>Prazo Fatal</th>
+                    <th>Prazo / Audiência</th>
                     <th style="text-align: right;">Ações</th>
                   </tr>
                 </thead>
@@ -1240,12 +1335,36 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             </div>
           </div>
 
+          <!-- Audiências agendadas (com Editar) -->
+          <div class="panel-box" id="bloco-audiencias">
+            <div class="panel-title">
+              <span>Audiências Agendadas (<span id="count-audiencias">0</span>)</span>
+            </div>
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Comarca / Vara</th>
+                    <th>Nº CNJ</th>
+                    <th>Cliente</th>
+                    <th style="text-align: right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="table-audiencias-body"></tbody>
+              </table>
+            </div>
+            <p class="hint" style="margin-top:0.75rem;">Dois dias antes de cada audiência, o sistema envia um e-mail de lembrete ao advogado e ao cliente (e-mail do cadastro do cliente).</p>
+          </div>
+
           <div class="panel-box">
+            <div class="panel-title"><span>Prazos e Audiências por Prioridade</span></div>
             <!-- Vencidos -->
             <div class="urgency-section urgency-vencido">
               <div class="urgency-header">
                 <span class="urgency-dot"></span>
-                Vencidos / Atenção Imediata (<span id="count-vencidos">0</span>)
+                <span>Vencidos / Atenção Imediata (<span id="count-vencidos">0</span>)</span>
               </div>
               <div id="list-urgency-vencidos"></div>
             </div>
@@ -1254,7 +1373,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             <div class="urgency-section urgency-semana">
               <div class="urgency-header">
                 <span class="urgency-dot"></span>
-                Prazo Esta Semana (<span id="count-semana">0</span>)
+                <span>Prazo Esta Semana (<span id="count-semana">0</span>)</span>
               </div>
               <div id="list-urgency-semana"></div>
             </div>
@@ -1263,10 +1382,67 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             <div class="urgency-section urgency-proximas">
               <div class="urgency-header">
                 <span class="urgency-dot"></span>
-                Próximas Semanas e Futuros (<span id="count-proximas">0</span>)
+                <span>Próximas Semanas e Futuros (<span id="count-proximas">0</span>)</span>
               </div>
               <div id="list-urgency-proximas"></div>
             </div>
+
+            <!-- Cumpridos -->
+            <div class="urgency-section">
+              <div class="urgency-header" style="color:#03543f;">
+                <span class="urgency-dot" style="background-color:#0e9f6e;"></span>
+                <span>Cumpridos — últimos 12 meses (<span id="count-cumpridos">0</span>)</span>
+              </div>
+              <div id="list-urgency-cumpridos"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- ABA 5: TAREFAS PENDENTES                   -->
+        <!-- ========================================== -->
+        <section id="view-tarefas" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Tarefas Pendentes</h2>
+              <p class="page-subtitle">Prazos e audiências ainda não cumpridos, com filtro por período</p>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <div class="filtro-periodo">
+              <div class="form-group">
+                <label for="tar-ini">Data inicial</label>
+                <input type="date" id="tar-ini" class="form-control" onchange="renderTarefas()">
+              </div>
+              <div class="form-group">
+                <label for="tar-fim">Data final</label>
+                <input type="date" id="tar-fim" class="form-control" onchange="renderTarefas()">
+              </div>
+              <button class="btn-secondary" onclick="periodoTarefas('semana-que-vem')">Próxima semana (seg–sex)</button>
+              <button class="btn-secondary" onclick="periodoTarefas('mes')">Próximos 30 dias</button>
+              <button class="btn-secondary" onclick="periodoTarefas('limpar')">Limpar filtro</button>
+            </div>
+
+            <div class="tab-pills" id="tar-pills">
+              <button class="on" data-st="pendentes" onclick="statusTarefas(this)">Pendentes</button>
+              <button data-st="cumpridas" onclick="statusTarefas(this)">Cumpridas</button>
+              <button data-st="todas" onclick="statusTarefas(this)">Todas</button>
+            </div>
+
+            <p class="hint" id="tar-resumo" style="margin-bottom:1rem;"></p>
+
+            <div class="tarefas-cols">
+              <div>
+                <div class="panel-title" style="font-size:1.2rem;"><span><span class="tipo-tag tipo-prazo">Prazos</span> (<span id="tar-n-prazos">0</span>)</span></div>
+                <div id="tar-lista-prazos"></div>
+              </div>
+              <div>
+                <div class="panel-title" style="font-size:1.2rem;"><span><span class="tipo-tag tipo-audiencia">Audiências</span> (<span id="tar-n-aud">0</span>)</span></div>
+                <div id="tar-lista-aud"></div>
+              </div>
+            </div>
+            <p class="hint" style="margin-top:1rem;">Toda sexta-feira o sistema envia para ronaldobergamini.advogado@gmail.com as tarefas de segunda a sexta da semana seguinte. Sem filtro, a lista mostra tudo a partir de 12 meses atrás.</p>
           </div>
         </section>
 
@@ -1315,6 +1491,54 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           </div>
         </section>
 
+
+        <!-- ========================================== -->
+        <!-- ABA 6: SALVAR / EXPORTAR                   -->
+        <!-- ========================================== -->
+        <section id="view-dados" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Salvar e Exportar</h2>
+              <p class="page-subtitle">Seus dados ficam salvos automaticamente na nuvem. Aqui você guarda uma cópia no computador.</p>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <div class="panel-title"><span>Salvamento automático</span></div>
+            <p style="font-size:0.92rem;">Cada cadastro ou alteração é gravado na hora no servidor do Google (Firebase), e fica disponível em qualquer computador ou celular com login. Além disso, todo domingo é feita uma cópia de segurança automática no Google Drive do escritório (pasta <strong>Backups JurisPro Bergamini</strong>).</p>
+            <p class="hint" id="dados-resumo" style="margin-top:0.5rem;"></p>
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1rem;">
+              <a class="btn-secondary" style="text-decoration:none;" href="https://drive.google.com/drive/search?q=Backups%20JurisPro%20Bergamini" target="_blank" rel="noopener">Abrir backups no Google Drive</a>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <div class="panel-title"><span>Salvar no computador</span></div>
+            <div class="pub-botoes" style="margin-top:0;">
+              <button class="btn-gold" onclick="exportarExcel()">Exportar planilha Excel (.xlsx)</button>
+              <button class="btn-gold" onclick="salvarComo()">Salvar como… (cópia completa .json)</button>
+            </div>
+            <p class="hint">A planilha traz três abas: Clientes, Processos e Tarefas (prazos e audiências). A cópia completa (.json) serve para restaurar o sistema, se um dia for preciso.</p>
+            <div class="aviso-box" style="margin-top:0.75rem;">Os arquivos exportados contêm dados pessoais e bancários dos clientes (LGPD). Guarde em local seguro e não envie por e-mail sem necessidade.</div>
+          </div>
+
+          <div class="panel-box" id="bloco-restaurar" style="display:none;">
+            <div class="panel-title"><span>Restaurar uma cópia (.json)</span></div>
+            <p style="font-size:0.9rem;">Grava de volta no servidor os clientes e processos de um arquivo de cópia. Registros com o mesmo código são substituídos; os demais não são apagados.</p>
+            <input type="file" id="arq-restaurar" accept=".json,application/json" class="form-control" style="max-width:420px; margin-top:0.75rem;">
+            <button class="btn-secondary" style="margin-top:0.75rem;" onclick="restaurarBackup()">Restaurar</button>
+          </div>
+
+          <div class="panel-box">
+            <div class="panel-title"><span>Acessos ao site</span></div>
+            <p style="font-size:0.92rem;">O site conta as visitas pelo Google Analytics (gratuito, já instalado no site). Para ver quantas pessoas acessaram, de onde vieram e quais páginas viram, abra o painel com a conta Google do projeto:</p>
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1rem;">
+              <a class="btn-secondary" style="text-decoration:none;" href="https://console.firebase.google.com/project/bergamini-advogado/analytics" target="_blank" rel="noopener">Ver acessos no Firebase</a>
+              <a class="btn-secondary" style="text-decoration:none;" href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener">Ver no Google Analytics</a>
+            </div>
+            <p class="hint" style="margin-top:0.6rem;">Os números começam a aparecer em até 24 horas depois da publicação.</p>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -1374,9 +1598,78 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="proc-prazo">Prazo Fatal / Data Relevante *</label>
-            <input type="date" id="proc-prazo" class="form-control" required>
+          <!-- Há prazo? -->
+          <div class="form-section">
+            <div class="yesno-row">
+              <span class="q">Há prazo?</span>
+              <div class="yesno" id="yn-prazo">
+                <button type="button" data-v="sim" onclick="setYesNo('prazo', true)">Sim</button>
+                <button type="button" data-v="nao" onclick="setYesNo('prazo', false)">Não</button>
+              </div>
+            </div>
+            <div class="reveal" id="rev-prazo">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="proc-prazo">Data do prazo *</label>
+                  <input type="date" id="proc-prazo" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="proc-prazo-desc">O que deve ser feito</label>
+                  <input type="text" id="proc-prazo-desc" class="form-control" placeholder="Ex.: réplica, recurso, manifestação">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Há audiência? -->
+          <div class="form-section">
+            <div class="yesno-row">
+              <span class="q">Há audiência?</span>
+              <div class="yesno" id="yn-aud">
+                <button type="button" data-v="sim" onclick="setYesNo('aud', true)">Sim</button>
+                <button type="button" data-v="nao" onclick="setYesNo('aud', false)">Não</button>
+              </div>
+            </div>
+            <div class="reveal" id="rev-aud">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="proc-aud-data">Data da audiência *</label>
+                  <input type="date" id="proc-aud-data" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="proc-aud-hora">Horário *</label>
+                  <input type="time" id="proc-aud-hora" class="form-control">
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="proc-aud-comarca">Comarca *</label>
+                  <input type="text" id="proc-aud-comarca" class="form-control" placeholder="Ex.: Rio das Ostras">
+                </div>
+                <div class="form-group">
+                  <label for="proc-aud-vara">Vara / Juízo</label>
+                  <input type="text" id="proc-aud-vara" class="form-control" placeholder="Ex.: 1ª Vara Cível">
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="proc-aud-tipo">Tipo de audiência</label>
+                  <input type="text" id="proc-aud-tipo" class="form-control" placeholder="Ex.: conciliação, instrução e julgamento">
+                </div>
+                <div class="form-group">
+                  <label for="proc-aud-modo">Modalidade</label>
+                  <select id="proc-aud-modo" class="form-control">
+                    <option value="Presencial">Presencial</option>
+                    <option value="Virtual">Virtual (videoconferência)</option>
+                    <option value="Híbrida">Híbrida</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="proc-aud-local">Endereço ou link da sala virtual</label>
+                <input type="text" id="proc-aud-local" class="form-control" placeholder="Opcional — vai no e-mail de lembrete">
+              </div>
+            </div>
           </div>
 
           <div class="form-group">
@@ -1423,9 +1716,93 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             </div>
           </div>
 
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="cli-email">E-mail de Contato *</label>
+              <input type="email" id="cli-email" class="form-control" placeholder="cliente@exemplo.com.br" required>
+            </div>
+            <div class="form-group">
+              <label for="cli-nasc">Data de Nascimento</label>
+              <input type="date" id="cli-nasc" class="form-control">
+            </div>
+          </div>
+
           <div class="form-group">
-            <label for="cli-email">E-mail de Contato *</label>
-            <input type="email" id="cli-email" class="form-control" placeholder="cliente@exemplo.com.br" required>
+            <label for="cli-end">Endereço</label>
+            <input type="text" id="cli-end" class="form-control" placeholder="Rua, número, complemento, bairro, cidade/UF, CEP">
+          </div>
+
+          <!-- Causa e honorários -->
+          <div class="form-section">
+            <div class="form-section-title">Causa e Honorários</div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="cli-valor-causa">Valor da Causa (R$)</label>
+                <input type="text" id="cli-valor-causa" class="form-control campo-moeda" inputmode="decimal" placeholder="0,00">
+              </div>
+              <div class="form-group">
+                <label for="cli-hon-valor">Valor dos Honorários (R$)</label>
+                <input type="text" id="cli-hon-valor" class="form-control campo-moeda" inputmode="decimal" placeholder="0,00">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="cli-hon-forma">Como será pago</label>
+              <input type="text" id="cli-hon-forma" class="form-control" placeholder="Ex.: à vista no PIX; 3x de R$ 1.000; 30% no êxito">
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="cli-hon-pago">Já foi pago?</label>
+                <select id="cli-hon-pago" class="form-control">
+                  <option value="Não">Não</option>
+                  <option value="Parcialmente">Parcialmente</option>
+                  <option value="Sim">Sim</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="cli-hon-obs">Observação do pagamento</label>
+                <input type="text" id="cli-hon-obs" class="form-control" placeholder="Ex.: 1ª parcela paga em 10/11">
+              </div>
+            </div>
+          </div>
+
+          <!-- Dados bancários -->
+          <div class="form-section">
+            <div class="form-section-title">Informações Bancárias do Cliente</div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="cli-banco">Banco</label>
+                <input type="text" id="cli-banco" class="form-control" placeholder="Ex.: 001 – Banco do Brasil">
+              </div>
+              <div class="form-group">
+                <label for="cli-conta-tipo">Tipo de conta</label>
+                <select id="cli-conta-tipo" class="form-control">
+                  <option value="">—</option>
+                  <option value="Corrente">Corrente</option>
+                  <option value="Poupança">Poupança</option>
+                  <option value="Pagamento">Pagamento</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="cli-agencia">Agência</label>
+                <input type="text" id="cli-agencia" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="cli-conta">Conta (com dígito)</label>
+                <input type="text" id="cli-conta" class="form-control">
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="cli-pix">Chave PIX</label>
+                <input type="text" id="cli-pix" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="cli-titular">Titular da conta (se diferente)</label>
+                <input type="text" id="cli-titular" class="form-control">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1434,6 +1811,117 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           <button type="submit" class="btn-gold">Salvar Cliente</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: EDITAR AUDIÊNCIA                    -->
+  <!-- ========================================== -->
+  <div id="modal-audiencia" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Editar Audiência</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-audiencia')">&times;</button>
+      </div>
+      <form onsubmit="salvarAudiencia(event)">
+        <div class="modal-content">
+          <input type="hidden" id="aud-proc-id">
+          <p class="hint" id="aud-ref" style="margin-bottom:1rem;"></p>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="aud-data">Data *</label>
+              <input type="date" id="aud-data" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="aud-hora">Horário *</label>
+              <input type="time" id="aud-hora" class="form-control" required>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="aud-comarca">Comarca *</label>
+              <input type="text" id="aud-comarca" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="aud-vara">Vara / Juízo</label>
+              <input type="text" id="aud-vara" class="form-control">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="aud-tipo">Tipo de audiência</label>
+              <input type="text" id="aud-tipo" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="aud-modo">Modalidade</label>
+              <select id="aud-modo" class="form-control">
+                <option value="Presencial">Presencial</option>
+                <option value="Virtual">Virtual (videoconferência)</option>
+                <option value="Híbrida">Híbrida</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="aud-local">Endereço ou link da sala virtual</label>
+            <input type="text" id="aud-local" class="form-control">
+          </div>
+          <p class="hint">Se a data ou o horário mudarem, os lembretes por e-mail serão enviados de novo para a nova data.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="removerAudiencia()" style="margin-right:auto; color:#c81e1e;">Remover audiência</button>
+          <button type="button" class="btn-secondary" onclick="fecharModal('modal-audiencia')">Voltar</button>
+          <button type="submit" class="btn-gold">Salvar Audiência</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: BUSCAR PUBLICAÇÕES                  -->
+  <!-- ========================================== -->
+  <div id="modal-pub" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 760px;">
+      <div class="modal-header">
+        <h3>Buscar Publicações</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-pub')">&times;</button>
+      </div>
+      <div class="modal-content">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="pub-tipo">Buscar por</label>
+            <select id="pub-tipo" class="form-control" onchange="pubAjustarCampo()">
+              <option value="processo">Número do processo</option>
+              <option value="nome">Nome da parte (cliente)</option>
+              <option value="cpf">CPF / CNPJ do cliente</option>
+              <option value="oab">OAB do advogado (RJ 182.124)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pub-termo">Termo da busca</label>
+            <input type="text" id="pub-termo" class="form-control">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="pub-ini">Publicações a partir de</label>
+            <input type="date" id="pub-ini" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="pub-fim">Até</label>
+            <input type="date" id="pub-fim" class="form-control">
+          </div>
+        </div>
+
+        <button class="btn-gold" style="width:100%;" onclick="buscarPublicacoes()">Buscar no Comunica PJe (Diário de Justiça Eletrônico Nacional)</button>
+
+        <div class="pub-botoes">
+          <button class="btn-secondary" onclick="abrirSiteJustica('comunica')">Abrir Comunica PJe no site</button>
+          <button class="btn-secondary" onclick="abrirSiteJustica('tjrj')">Abrir Consulta Processual TJRJ</button>
+        </div>
+        <p class="hint" id="pub-dica" style="margin-bottom:0.75rem;"></p>
+        <div id="pub-status"></div>
+        <div id="pub-resultados" class="pub-resultados"></div>
+      </div>
     </div>
   </div>
 
@@ -1474,12 +1962,28 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       const mapaAntes = new Map(antes.map(x => [x.id, JSON.stringify(x)]));
       const ids = new Set(lista.map(x => x.id));
       lista.forEach(x => {
-        if (mapaAntes.get(x.id) !== JSON.stringify(x)) window.JP.salvar(nome, x).catch(erroSalvar);
+        if (mapaAntes.get(x.id) !== JSON.stringify(x)) acompanhar(window.JP.salvar(nome, x));
       });
       antes.forEach(x => {
-        if (!ids.has(x.id)) window.JP.excluir(nome, x.id).catch(erroSalvar);
+        if (!ids.has(x.id)) acompanhar(window.JP.excluir(nome, x.id));
       });
     }
+
+    // Indicador "Salvando... / Salvo na nuvem"
+    let GRAVANDO = 0;
+    function marcarSync(estado) {
+      const el = document.getElementById("sync-status"); if (!el) return;
+      el.className = "sync-status " + estado;
+      el.textContent = estado === "salvando" ? "⟳ Salvando..." : (estado === "erro" ? "⚠ Não salvo — tente de novo" : "☁ Salvo na nuvem");
+    }
+    function acompanhar(promessa) {
+      GRAVANDO++; marcarSync("salvando");
+      promessa.then(() => {
+        GRAVANDO--; if (!GRAVANDO) marcarSync("ok");
+      }).catch(e => { GRAVANDO--; marcarSync("erro"); erroSalvar(e); });
+    }
+
+    window.addEventListener("beforeunload", ev => { if (GRAVANDO > 0) { ev.preventDefault(); ev.returnValue = ""; } });
 
     function erroSalvar(e) {
       console.error(e);
@@ -1564,34 +2068,95 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       renderPrazosList();
       renderClientesTable();
       populateClientSelect();
+      renderTarefas();
+      resumoDados();
     }
 
-    // KPIs do Dashboard
-    function updateKpis() {
-      const processos = getStoredProcessos();
-      const ativos = processos.filter(p => p.status === "Ativo").length;
-      
-      let prazosEstaSemana = 0;
-      processos.forEach(p => {
-        if (getDeadlineStatus(p.prazo) === "semana") {
-          prazosEstaSemana++;
+    // ===============================================================
+    // CONTATO DO ESCRITÓRIO (vai nos e-mails e na busca por OAB)
+    // ===============================================================
+    const ESCRITORIO = {
+      advogado: "Dr. Ronaldo Bergamini",
+      oab: "182124", ufOab: "RJ",
+      email: "ronaldobergamini.advogado@gmail.com",
+      telefone: "(21) 99807-5723"
+    };
+
+    // ---------- Utilitários de data ----------
+    function hojeISO() { return getOffsetDateString(0); }
+    function isoMaisDias(iso, dias) {
+      const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + dias);
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+    const DIAS_SEMANA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+    function diaSemana(iso) { return iso ? DIAS_SEMANA[new Date(iso + "T12:00:00").getDay()] : ""; }
+
+    // ---------- Moeda ----------
+    function lerMoeda(txt) {
+      let s = String(txt || "").replace(/[^\d,.-]/g, "");
+      if (!s) return null;
+      if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+      const n = parseFloat(s);
+      return isNaN(n) ? null : n;
+    }
+    function fmtMoeda(n) {
+      if (n === null || n === undefined || n === "" || isNaN(n)) return "";
+      return Number(n).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // ---------- Normalização de registros antigos ----------
+    function temPrazo(p) { return p.temPrazo !== undefined ? !!p.temPrazo && !!p.prazo : !!p.prazo; }
+    function temAudiencia(p) { return !!p.temAudiencia && !!(p.audiencia && p.audiencia.data); }
+
+    // Lista única de tarefas (prazos + audiências) a partir dos processos
+    function listarTarefas() {
+      const out = [];
+      getStoredProcessos().forEach(p => {
+        if (temPrazo(p)) {
+          out.push({
+            chave: p.id + ":prazo", tipo: "prazo", data: p.prazo, hora: "", proc: p,
+            cumprido: !!p.prazoCumprido, obs: p.prazoCumpridoObs || "",
+            desc: p.prazoDesc || p.obs || ""
+          });
+        }
+        if (temAudiencia(p)) {
+          const a = p.audiencia;
+          out.push({
+            chave: p.id + ":audiencia", tipo: "audiencia", data: a.data, hora: a.hora || "", proc: p,
+            cumprido: !!a.cumprido, obs: a.cumpridoObs || "",
+            desc: [a.tipo, a.comarca, a.vara].filter(Boolean).join(" · ")
+          });
         }
       });
+      return out.sort((x, y) => (x.data + x.hora).localeCompare(y.data + y.hora));
+    }
 
-      document.getElementById("kpi-processos-ativos").textContent = ativos;
-      document.getElementById("kpi-prazos-semana").textContent = prazosEstaSemana;
+    function contatoCliente(nome) {
+      return getStoredClientes().find(c => c.nome === nome) || null;
+    }
+
+    // ---------- KPIs do Dashboard ----------
+    function updateKpis() {
+      const processos = getStoredProcessos();
+      const tarefas = listarTarefas();
+      const hoje = hojeISO(), umAno = isoMaisDias(hoje, -365);
+      document.getElementById("kpi-processos-ativos").textContent = processos.filter(p => p.status === "Ativo").length;
+      document.getElementById("kpi-prazos-semana").textContent =
+        tarefas.filter(t => t.tipo === "prazo" && !t.cumprido && getDeadlineStatus(t.data) === "semana").length;
+      document.getElementById("kpi-audiencias").textContent =
+        tarefas.filter(t => t.tipo === "audiencia" && !t.cumprido && t.data >= hoje).length;
+      document.getElementById("kpi-tarefas").textContent =
+        tarefas.filter(t => !t.cumprido && t.data >= umAno).length;
     }
 
     // Processos Recentes no Dashboard
     function renderDashboardRecent() {
       const processos = getStoredProcessos().slice(0, 5);
       const tbody = document.getElementById("table-recentes-body");
-      
       if (processos.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888;">Nenhum processo cadastrado.</td></tr>`;
         return;
       }
-
       tbody.innerHTML = processos.map(p => `
         <tr>
           <td><strong style="color: var(--navy);">${escapeHtml(p.cnj)}</strong></td>
@@ -1602,72 +2167,67 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       `).join("");
     }
 
-    // Próximos Prazos no Dashboard
+    // Próximos Prazos e Audiências no Dashboard
     function renderDashboardPrazos() {
       const container = document.getElementById("list-proximos-prazos");
-      const processos = getStoredProcessos()
-        .filter(p => p.prazo)
-        .sort((a, b) => new Date(a.prazo) - new Date(b.prazo))
-        .slice(0, 4);
-
-      if (processos.length === 0) {
-        container.innerHTML = `<div style="color: #888; font-size: 0.875rem;">Nenhum prazo registrado.</div>`;
+      const lista = listarTarefas().filter(t => !t.cumprido).slice(0, 5);
+      if (lista.length === 0) {
+        container.innerHTML = `<div style="color: #888; font-size: 0.875rem;">Nenhum prazo ou audiência pendente.</div>`;
         return;
       }
-
-      container.innerHTML = processos.map(p => {
-        const urgency = getDeadlineStatus(p.prazo);
-        let tagColor = "#2563eb";
-        let tagLabel = "No prazo";
-        if (urgency === "vencido") {
-          tagColor = "#e02424";
-          tagLabel = "Vencido";
-        } else if (urgency === "semana") {
-          tagColor = "#d97706";
-          tagLabel = "Esta semana";
-        }
-
+      container.innerHTML = lista.map(t => {
+        const urgency = getDeadlineStatus(t.data);
+        let tagColor = "#2563eb", tagLabel = "No prazo";
+        if (urgency === "vencido") { tagColor = "#e02424"; tagLabel = "Vencido"; }
+        else if (urgency === "semana") { tagColor = "#d97706"; tagLabel = "Esta semana"; }
         return `
           <div style="border-left: 3px solid ${tagColor}; padding: 0.6rem 0.85rem; background: #fbfcfd; border-radius: 4px; border-top: 1px solid #f1f3f5; border-right: 1px solid #f1f3f5; border-bottom: 1px solid #f1f3f5;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-              <span style="font-size: 0.85rem; font-weight: 600; color: var(--navy);">${escapeHtml(p.cliente)}</span>
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--navy);">${tagTipo(t.tipo)}${escapeHtml(t.proc.cliente)}</span>
               <span style="font-size: 0.75rem; font-weight: 600; color: ${tagColor};">${tagLabel}</span>
             </div>
-            <div style="font-size: 0.775rem; color: #64748b;">${escapeHtml(p.area)} &bull; ${formatarDataBR(p.prazo)}</div>
-          </div>
-        `;
+            <div style="font-size: 0.775rem; color: #64748b;">${formatarDataBR(t.data)}${t.hora ? " às " + escapeHtml(t.hora) : ""} &bull; ${escapeHtml(t.proc.cnj)}</div>
+          </div>`;
       }).join("");
     }
 
-    // Tabela de Processos
+    function tagTipo(tipo) {
+      return tipo === "audiencia"
+        ? '<span class="tipo-tag tipo-audiencia">Audiência</span>'
+        : '<span class="tipo-tag tipo-prazo">Prazo</span>';
+    }
+
+    // ---------- Tabela de Processos ----------
     function renderProcessosTable() {
       const search = (document.getElementById("search-processos").value || "").toLowerCase();
       const statusFilter = document.getElementById("filter-status").value;
-      const processos = getStoredProcessos();
       const tbody = document.getElementById("table-processos-body");
-
-      const filtered = processos.filter(p => {
-        const matchSearch = p.cnj.toLowerCase().includes(search) ||
-                            p.cliente.toLowerCase().includes(search) ||
-                            p.area.toLowerCase().includes(search);
-        const matchStatus = statusFilter === "" || p.status === statusFilter;
-        return matchSearch && matchStatus;
+      const filtered = getStoredProcessos().filter(p => {
+        const matchSearch = String(p.cnj || "").toLowerCase().includes(search) ||
+                            String(p.cliente || "").toLowerCase().includes(search) ||
+                            String(p.area || "").toLowerCase().includes(search);
+        return matchSearch && (statusFilter === "" || p.status === statusFilter);
       });
-
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #888; padding: 1.5rem;">Nenhum processo encontrado para os critérios pesquisados.</td></tr>`;
         return;
       }
-
-      tbody.innerHTML = filtered.map(p => `
+      tbody.innerHTML = filtered.map(p => {
+        const linhas = [];
+        if (temPrazo(p)) linhas.push(`<div>${tagTipo("prazo")}${formatarDataBR(p.prazo)}${p.prazoCumprido ? ' <span class="tipo-tag tag-cumprido">Cumprido</span>' : ""}</div>`);
+        if (temAudiencia(p)) linhas.push(`<div style="margin-top:3px;">${tagTipo("audiencia")}${formatarDataBR(p.audiencia.data)} ${escapeHtml(p.audiencia.hora || "")}${p.audiencia.cumprido ? ' <span class="tipo-tag tag-cumprido">Cumprida</span>' : ""}</div>`);
+        return `
         <tr>
           <td><strong style="color: var(--navy);">${escapeHtml(p.cnj)}</strong></td>
           <td>${escapeHtml(p.cliente)}</td>
           <td>${escapeHtml(p.area)}</td>
           <td><span class="badge-status ${getBadgeClass(p.status)}">${escapeHtml(p.status)}</span></td>
-          <td><span style="font-weight: 500;">${formatarDataBR(p.prazo)}</span></td>
+          <td style="font-size:0.84rem;">${linhas.join("") || '<span style="color:#94a3b8;">—</span>'}</td>
           <td style="text-align: right;">
             <div class="table-actions" style="justify-content: flex-end;">
+              <button class="btn-icon" title="Buscar publicações deste processo" onclick="abrirPublicacoes('processo', '${p.id}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+              </button>
               <button class="btn-icon" title="Editar Processo" onclick="editProcesso('${p.id}')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               </button>
@@ -1676,38 +2236,59 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               </button>
             </div>
           </td>
-        </tr>
-      `).join("");
+        </tr>`;
+      }).join("");
     }
 
-    // Tela de Prazos Agrupada por Urgência
+    // ---------- Aba Prazos e Audiências ----------
+    // Escolhas de "Cumprido?" ainda não salvas (sobrevivem à atualização da tela)
+    const UI_CUMPRIDO = {};
+
     function renderPrazosList() {
-      const processos = getStoredProcessos().filter(p => p.prazo);
-      
-      const vencidos = [];
-      const semana = [];
-      const proximas = [];
-
-      processos.forEach(p => {
-        const u = getDeadlineStatus(p.prazo);
-        if (u === "vencido") vencidos.push(p);
-        else if (u === "semana") semana.push(p);
-        else proximas.push(p);
+      const hoje = hojeISO(), umAno = isoMaisDias(hoje, -365);
+      const todas = listarTarefas();
+      const vencidos = [], semana = [], proximas = [], cumpridos = [];
+      todas.forEach(t => {
+        if (t.cumprido) { if (t.data >= umAno) cumpridos.push(t); return; }
+        const u = getDeadlineStatus(t.data);
+        if (u === "vencido") vencidos.push(t);
+        else if (u === "semana") semana.push(t);
+        else proximas.push(t);
       });
-
-      // Ordenar por data
-      const sortFn = (a, b) => new Date(a.prazo) - new Date(b.prazo);
-      vencidos.sort(sortFn);
-      semana.sort(sortFn);
-      proximas.sort(sortFn);
+      cumpridos.reverse();
 
       document.getElementById("count-vencidos").textContent = vencidos.length;
       document.getElementById("count-semana").textContent = semana.length;
       document.getElementById("count-proximas").textContent = proximas.length;
+      document.getElementById("count-cumpridos").textContent = cumpridos.length;
 
-      renderDeadlineGroup("list-urgency-vencidos", vencidos, "Nenhum prazo vencido no momento.");
-      renderDeadlineGroup("list-urgency-semana", semana, "Nenhum prazo previsto para esta semana.");
+      renderDeadlineGroup("list-urgency-vencidos", vencidos, "Nenhum prazo ou audiência vencido.");
+      renderDeadlineGroup("list-urgency-semana", semana, "Nada previsto para os próximos 7 dias.");
       renderDeadlineGroup("list-urgency-proximas", proximas, "Nenhum compromisso futuro agendado.");
+      renderDeadlineGroup("list-urgency-cumpridos", cumpridos, "Nenhum item marcado como cumprido nos últimos 12 meses.");
+
+      renderAudienciasTabela(todas.filter(t => t.tipo === "audiencia" && !t.cumprido && t.data >= hoje));
+    }
+
+    function renderAudienciasTabela(lista) {
+      document.getElementById("count-audiencias").textContent = lista.length;
+      const tbody = document.getElementById("table-audiencias-body");
+      if (!lista.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#888; padding:1.25rem;">Nenhuma audiência agendada. Cadastre em "Novo Processo" ou edite um processo e responda "Sim" em "Há audiência?".</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = lista.map(t => {
+        const a = t.proc.audiencia;
+        return `
+        <tr>
+          <td><strong style="color:var(--navy);">${formatarDataBR(a.data)}</strong><div style="font-size:0.75rem; color:#64748b;">${diaSemana(a.data)}</div></td>
+          <td>${escapeHtml(a.hora || "—")}</td>
+          <td>${escapeHtml(a.comarca || "—")}${a.vara ? '<div style="font-size:0.75rem; color:#64748b;">' + escapeHtml(a.vara) + "</div>" : ""}</td>
+          <td>${escapeHtml(t.proc.cnj)}</td>
+          <td>${escapeHtml(t.proc.cliente)}</td>
+          <td style="text-align:right;"><button class="btn-secondary" style="font-size:0.8125rem; padding:0.4rem 0.8rem;" onclick="abrirAudiencia('${t.proc.id}')">Editar</button></td>
+        </tr>`;
+      }).join("");
     }
 
     function renderDeadlineGroup(elementId, list, emptyMsg) {
@@ -1716,57 +2297,229 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         container.innerHTML = `<div style="font-size: 0.85rem; color: #888; padding: 0.5rem 0;">${emptyMsg}</div>`;
         return;
       }
-
-      container.innerHTML = list.map(p => `
-        <div class="deadline-card">
-          <div>
-            <div class="deadline-title">${escapeHtml(p.cliente)} &bull; <span style="font-weight: 400; color: #555;">${escapeHtml(p.area)}</span></div>
-            <div class="deadline-sub">
-              <strong>CNJ:</strong> ${escapeHtml(p.cnj)} &bull; ${escapeHtml(p.obs || 'Sem observações')}
+      container.innerHTML = list.map(t => {
+        const p = t.proc;
+        const ui = UI_CUMPRIDO[t.chave];
+        const editar = t.tipo === "audiencia"
+          ? `onclick="abrirAudiencia('${p.id}')"` : `onclick="editProcesso('${p.id}')"`;
+        const valor = ui ? ui.v : (t.cumprido ? "sim" : "");
+        const caixa = ui ? `
+          <div class="cumprido-box">
+            <div class="yesno-row">
+              <span class="q">Cumprido?</span>
+              <div class="yesno">
+                <button type="button" class="${valor === "sim" ? "on" : ""}" onclick="escolherCumprido('${t.chave}', 'sim')">Sim</button>
+                <button type="button" class="${valor === "nao" ? "on" : ""}" onclick="escolherCumprido('${t.chave}', 'nao')">Não</button>
+              </div>
             </div>
+            <div class="${valor ? "" : "reveal"}">
+              <div class="form-group" style="margin-bottom:0.6rem;">
+                <label>Informações</label>
+                <textarea class="form-control" rows="2" id="obs-${t.chave.replace(/[^a-z0-9]/gi, "_")}" placeholder="${valor === "nao" ? "Motivo / providência pendente" : "O que foi feito, protocolo, resultado da audiência..."}" oninput="UI_CUMPRIDO['${t.chave}'].obs = this.value">${escapeHtml(ui.obs)}</textarea>
+              </div>
+              <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button class="btn-secondary" style="font-size:0.8125rem; padding:0.4rem 0.8rem;" onclick="delete UI_CUMPRIDO['${t.chave}']; renderPrazosList();">Voltar</button>
+                <button class="btn-gold" style="font-size:0.8125rem; padding:0.4rem 0.8rem;" onclick="salvarCumprido('${t.chave}')">Salvar</button>
+              </div>
+            </div>
+          </div>` : "";
+        return `
+        <div class="deadline-card ${t.cumprido ? "feito" : ""}">
+          <div style="flex:1; min-width:220px;">
+            <div class="deadline-title">${tagTipo(t.tipo)}${escapeHtml(p.cliente)} &bull; <span style="font-weight: 400; color: #555;">${escapeHtml(p.area)}</span>
+              ${t.cumprido ? '<span class="tipo-tag tag-cumprido" style="margin-left:0.4rem;">Cumprido</span>' : ""}</div>
+            <div class="deadline-sub">
+              <strong>CNJ:</strong> ${escapeHtml(p.cnj)}${t.desc ? " &bull; " + escapeHtml(t.desc) : ""}
+            </div>
+            ${t.obs ? `<div class="obs-feito"><strong>Informações:</strong> ${escapeHtml(t.obs)}</div>` : ""}
           </div>
-          <div style="display: flex; align-items: center; gap: 1.25rem;">
+          <div class="deadline-actions">
             <div class="deadline-date">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              ${formatarDataBR(p.prazo)}
+              ${formatarDataBR(t.data)}${t.hora ? " · " + escapeHtml(t.hora) : ""}
             </div>
-            <button class="btn-secondary" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;" onclick="editProcesso('${p.id}')">
-              Editar
-            </button>
+            ${ui ? "" : `<button class="btn-secondary" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;" onclick="abrirCumprido('${t.chave}')">${t.cumprido ? "Alterar cumprimento" : "Cumprido?"}</button>`}
+            <button class="btn-secondary" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;" ${editar}>Editar</button>
           </div>
-        </div>
-      `).join("");
+          ${caixa}
+        </div>`;
+      }).join("");
     }
 
-    // Tabela de Clientes
+    function acharTarefa(chave) { return listarTarefas().find(t => t.chave === chave); }
+
+    function abrirCumprido(chave) {
+      const t = acharTarefa(chave); if (!t) return;
+      UI_CUMPRIDO[chave] = { v: t.cumprido ? "sim" : "", obs: t.obs };
+      renderPrazosList();
+    }
+    function escolherCumprido(chave, v) {
+      if (!UI_CUMPRIDO[chave]) UI_CUMPRIDO[chave] = { v: "", obs: "" };
+      UI_CUMPRIDO[chave].v = v;
+      renderPrazosList();
+      const el = document.getElementById("obs-" + chave.replace(/[^a-z0-9]/gi, "_"));
+      if (el) el.focus();
+    }
+    function salvarCumprido(chave) {
+      const ui = UI_CUMPRIDO[chave];
+      if (!ui || !ui.v) { alert("Escolha Sim ou Não."); return; }
+      const [id, tipo] = chave.split(":");
+      const sim = ui.v === "sim", obs = (ui.obs || "").trim(), em = sim ? hojeISO() : "";
+      const processos = getStoredProcessos().map(p => {
+        if (p.id !== id) return p;
+        const n = JSON.parse(JSON.stringify(p));
+        if (tipo === "prazo") { n.prazoCumprido = sim; n.prazoCumpridoObs = obs; n.prazoCumpridoEm = em; }
+        else { n.audiencia = Object.assign({}, n.audiencia, { cumprido: sim, cumpridoObs: obs, cumpridoEm: em }); }
+        return n;
+      });
+      delete UI_CUMPRIDO[chave];
+      saveStoredProcessos(processos);
+    }
+
+    // ---------- Modal rápido de audiência ----------
+    function fecharModal(id) { document.getElementById(id).classList.remove("open"); }
+
+    function abrirAudiencia(procId) {
+      const p = getStoredProcessos().find(x => x.id === procId); if (!p) return;
+      const a = p.audiencia || {};
+      document.getElementById("aud-proc-id").value = p.id;
+      document.getElementById("aud-ref").innerHTML = "<strong>" + escapeHtml(p.cnj) + "</strong> &bull; " + escapeHtml(p.cliente);
+      document.getElementById("aud-data").value = a.data || "";
+      document.getElementById("aud-hora").value = a.hora || "";
+      document.getElementById("aud-comarca").value = a.comarca || "";
+      document.getElementById("aud-vara").value = a.vara || "";
+      document.getElementById("aud-tipo").value = a.tipo || "";
+      document.getElementById("aud-modo").value = a.modo || "Presencial";
+      document.getElementById("aud-local").value = a.local || "";
+      document.getElementById("modal-audiencia").classList.add("open");
+    }
+
+    function salvarAudiencia(e) {
+      e.preventDefault();
+      const id = document.getElementById("aud-proc-id").value;
+      const campos = {
+        data: document.getElementById("aud-data").value,
+        hora: document.getElementById("aud-hora").value,
+        comarca: document.getElementById("aud-comarca").value.trim(),
+        vara: document.getElementById("aud-vara").value.trim(),
+        tipo: document.getElementById("aud-tipo").value.trim(),
+        modo: document.getElementById("aud-modo").value,
+        local: document.getElementById("aud-local").value.trim()
+      };
+      const processos = getStoredProcessos().map(p => {
+        if (p.id !== id) return p;
+        const n = JSON.parse(JSON.stringify(p));
+        const antes = n.audiencia || {};
+        const remarcada = antes.data !== campos.data || antes.hora !== campos.hora;
+        n.temAudiencia = true;
+        n.audiencia = Object.assign({}, antes, campos, remarcada ? { cumprido: false, cumpridoObs: "", cumpridoEm: "" } : {});
+        return n;
+      });
+      saveStoredProcessos(processos);
+      fecharModal("modal-audiencia");
+    }
+
+    function removerAudiencia() {
+      if (!confirm("Remover a audiência deste processo? (O processo continua cadastrado.)")) return;
+      const id = document.getElementById("aud-proc-id").value;
+      const processos = getStoredProcessos().map(p => {
+        if (p.id !== id) return p;
+        const n = JSON.parse(JSON.stringify(p));
+        n.temAudiencia = false; n.audiencia = {};
+        return n;
+      });
+      saveStoredProcessos(processos);
+      fecharModal("modal-audiencia");
+    }
+
+    // ---------- Aba Tarefas Pendentes ----------
+    let TAR_STATUS = "pendentes";
+    function statusTarefas(btn) {
+      TAR_STATUS = btn.dataset.st;
+      document.querySelectorAll("#tar-pills button").forEach(b => b.classList.toggle("on", b === btn));
+      renderTarefas();
+    }
+    function proximaSemanaUtil(baseISO) {
+      // Segunda e sexta da semana seguinte à data-base
+      const d = new Date((baseISO || hojeISO()) + "T12:00:00");
+      const ate = (8 - d.getDay()) % 7 || 7;           // dias até a próxima segunda
+      const seg = isoMaisDias(baseISO || hojeISO(), ate);
+      return { ini: seg, fim: isoMaisDias(seg, 4) };
+    }
+    function periodoTarefas(tipo) {
+      const ini = document.getElementById("tar-ini"), fim = document.getElementById("tar-fim");
+      if (tipo === "semana-que-vem") { const s = proximaSemanaUtil(); ini.value = s.ini; fim.value = s.fim; }
+      else if (tipo === "mes") { ini.value = hojeISO(); fim.value = isoMaisDias(hojeISO(), 30); }
+      else { ini.value = ""; fim.value = ""; }
+      renderTarefas();
+    }
+    function renderTarefas() {
+      const el = document.getElementById("tar-lista-prazos"); if (!el) return;
+      const hoje = hojeISO(), umAno = isoMaisDias(hoje, -365);
+      const ini = document.getElementById("tar-ini").value || umAno;
+      const fim = document.getElementById("tar-fim").value || "9999-12-31";
+      let lista = listarTarefas().filter(t => t.data >= ini && t.data <= fim);
+      if (TAR_STATUS === "pendentes") lista = lista.filter(t => !t.cumprido);
+      else if (TAR_STATUS === "cumpridas") lista = lista.filter(t => t.cumprido);
+
+      const linha = t => {
+        const c = contatoCliente(t.proc.cliente);
+        const vencida = !t.cumprido && t.data < hoje;
+        return `
+        <div class="tarefa-linha ${vencida ? "tarefa-vencida" : ""}">
+          <div>
+            <div><strong>${escapeHtml(t.proc.cliente)}</strong>${t.cumprido ? ' <span class="tipo-tag tag-cumprido">Cumprido</span>' : ""}${vencida ? ' <span class="tipo-tag" style="background:#fde8e8;color:#9b1c1c;">Vencido</span>' : ""}</div>
+            <div style="color:#64748b; font-size:0.8rem;">${escapeHtml(t.proc.cnj)}${t.desc ? " · " + escapeHtml(t.desc) : ""}</div>
+            ${c && c.telefone ? `<div style="color:#64748b; font-size:0.78rem;">Contato: ${escapeHtml(c.telefone)}</div>` : ""}
+          </div>
+          <div style="text-align:right;">
+            <div class="tarefa-data">${formatarDataBR(t.data)}${t.hora ? " · " + escapeHtml(t.hora) : ""}</div>
+            <div style="color:#64748b; font-size:0.75rem;">${diaSemana(t.data)}</div>
+          </div>
+        </div>`;
+      };
+      const prazos = lista.filter(t => t.tipo === "prazo"), auds = lista.filter(t => t.tipo === "audiencia");
+      document.getElementById("tar-n-prazos").textContent = prazos.length;
+      document.getElementById("tar-n-aud").textContent = auds.length;
+      el.innerHTML = prazos.map(linha).join("") || '<div class="hint">Nenhum prazo no período.</div>';
+      document.getElementById("tar-lista-aud").innerHTML = auds.map(linha).join("") || '<div class="hint">Nenhuma audiência no período.</div>';
+      const tem = document.getElementById("tar-ini").value || document.getElementById("tar-fim").value;
+      document.getElementById("tar-resumo").textContent = tem
+        ? "Período: " + formatarDataBR(ini) + " a " + (fim === "9999-12-31" ? "sem data final" : formatarDataBR(fim)) + "."
+        : "Sem filtro: mostrando a partir de " + formatarDataBR(umAno) + " (12 meses atrás), incluindo os futuros.";
+    }
+
+    // ---------- Tabela de Clientes ----------
     function renderClientesTable() {
       const search = (document.getElementById("search-clientes").value || "").toLowerCase();
-      const clientes = getStoredClientes();
       const processos = getStoredProcessos();
       const tbody = document.getElementById("table-clientes-body");
-
-      const filtered = clientes.filter(c => {
-        return c.nome.toLowerCase().includes(search) ||
-               c.doc.toLowerCase().includes(search) ||
-               c.email.toLowerCase().includes(search);
-      });
-
+      const filtered = getStoredClientes().filter(c =>
+        String(c.nome || "").toLowerCase().includes(search) ||
+        String(c.doc || "").toLowerCase().includes(search) ||
+        String(c.email || "").toLowerCase().includes(search));
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #888; padding: 1.5rem;">Nenhum cliente encontrado.</td></tr>`;
         return;
       }
-
       tbody.innerHTML = filtered.map(c => {
         const procCount = processos.filter(p => p.cliente === c.nome && p.status === "Ativo").length;
+        const h = c.honorarios || {};
+        const corPago = h.pago === "Sim" ? "badge-ativo" : (h.pago === "Parcialmente" ? "badge-suspenso" : "badge-arquivado");
+        const honor = (h.valor || h.forma || h.pago)
+          ? `<div style="margin-top:3px; font-size:0.75rem;">Honorários${h.valor ? " R$ " + fmtMoeda(h.valor) : ""}: <span class="badge-status ${corPago}" style="font-size:0.65rem;">${h.pago === "Sim" ? "Pago" : (h.pago === "Parcialmente" ? "Parcial" : "Não pago")}</span></div>` : "";
         return `
           <tr>
-            <td><strong style="color: var(--navy);">${escapeHtml(c.nome)}</strong></td>
+            <td><strong style="color: var(--navy);">${escapeHtml(c.nome)}</strong>${honor}</td>
             <td><code>${escapeHtml(c.doc)}</code></td>
             <td>${escapeHtml(c.telefone)}</td>
             <td>${escapeHtml(c.email)}</td>
             <td style="text-align: center;"><span class="badge-status badge-concluido" style="font-weight: 700;">${procCount}</span></td>
             <td style="text-align: right;">
               <div class="table-actions" style="justify-content: flex-end;">
+                <button class="btn-icon" title="Buscar publicações deste cliente" onclick="abrirPublicacoes('cliente', '${c.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                </button>
                 <button class="btn-icon" title="Editar Cliente" onclick="editCliente('${c.id}')">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </button>
@@ -1775,42 +2528,50 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
                 </button>
               </div>
             </td>
-          </tr>
-        `;
+          </tr>`;
       }).join("");
     }
 
-    // Modal Processo
+    // ---------- Modal Processo ----------
     function populateClientSelect() {
-      const clientes = getStoredClientes();
       const select = document.getElementById("proc-cliente");
       const currentVal = select.value;
-      select.innerHTML = '<option value="">Selecione um cliente...</option>' + 
-        clientes.map(c => `<option value="${escapeHtml(c.nome)}">${escapeHtml(c.nome)}</option>`).join("");
+      select.innerHTML = '<option value="">Selecione um cliente...</option>' +
+        getStoredClientes().map(c => `<option value="${escapeHtml(c.nome)}">${escapeHtml(c.nome)}</option>`).join("");
       if (currentVal) select.value = currentVal;
+    }
+
+    // Botões Sim / Não do cadastro de processo
+    const YESNO = { prazo: false, aud: false };
+    function setYesNo(chave, sim) {
+      YESNO[chave] = sim;
+      document.querySelectorAll("#yn-" + chave + " button").forEach(b =>
+        b.classList.toggle("on", (b.dataset.v === "sim") === sim));
+      document.getElementById("rev-" + chave).classList.toggle("show", sim);
     }
 
     function openProcessModal(proc = null) {
       populateClientSelect();
-      const modal = document.getElementById("modal-processo");
-      const title = document.getElementById("modal-processo-title");
-
+      const $v = (id, v) => { document.getElementById(id).value = v == null ? "" : v; };
       if (proc) {
-        title.textContent = "Editar Processo";
-        document.getElementById("proc-id").value = proc.id;
-        document.getElementById("proc-cnj").value = proc.cnj;
-        document.getElementById("proc-cliente").value = proc.cliente;
-        document.getElementById("proc-area").value = proc.area;
-        document.getElementById("proc-status").value = proc.status;
-        document.getElementById("proc-prazo").value = proc.prazo;
-        document.getElementById("proc-obs").value = proc.obs || "";
+        document.getElementById("modal-processo-title").textContent = "Editar Processo";
+        $v("proc-id", proc.id); $v("proc-cnj", proc.cnj); $v("proc-cliente", proc.cliente);
+        $v("proc-area", proc.area); $v("proc-status", proc.status); $v("proc-obs", proc.obs);
+        $v("proc-prazo", proc.prazo); $v("proc-prazo-desc", proc.prazoDesc);
+        const a = proc.audiencia || {};
+        $v("proc-aud-data", a.data); $v("proc-aud-hora", a.hora); $v("proc-aud-comarca", a.comarca);
+        $v("proc-aud-vara", a.vara); $v("proc-aud-tipo", a.tipo); $v("proc-aud-modo", a.modo || "Presencial");
+        $v("proc-aud-local", a.local);
+        setYesNo("prazo", temPrazo(proc));
+        setYesNo("aud", temAudiencia(proc));
       } else {
-        title.textContent = "Cadastrar Novo Processo";
+        document.getElementById("modal-processo-title").textContent = "Cadastrar Novo Processo";
         document.getElementById("form-processo").reset();
-        document.getElementById("proc-id").value = "";
+        $v("proc-id", "");
+        setYesNo("prazo", false);
+        setYesNo("aud", false);
       }
-
-      modal.classList.add("open");
+      document.getElementById("modal-processo").classList.add("open");
     }
 
     function closeProcessModal() {
@@ -1819,37 +2580,42 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
     function handleProcessoSubmit(e) {
       e.preventDefault();
-      const id = document.getElementById("proc-id").value;
-      const cnj = document.getElementById("proc-cnj").value.trim();
-      const cliente = document.getElementById("proc-cliente").value;
-      const area = document.getElementById("proc-area").value;
-      const status = document.getElementById("proc-status").value;
-      const prazo = document.getElementById("proc-prazo").value;
-      const obs = document.getElementById("proc-obs").value.trim();
+      const g = id => document.getElementById(id).value.trim();
+      const id = g("proc-id");
+      if (YESNO.prazo && !g("proc-prazo")) { alert("Informe a data do prazo (ou marque \"Não\" em \"Há prazo?\")."); return; }
+      if (YESNO.aud && (!g("proc-aud-data") || !g("proc-aud-hora") || !g("proc-aud-comarca"))) {
+        alert("Informe data, horário e comarca da audiência (ou marque \"Não\" em \"Há audiência?\")."); return;
+      }
 
       let processos = getStoredProcessos();
+      const antigo = id ? (processos.find(p => p.id === id) || {}) : {};
+      const novo = JSON.parse(JSON.stringify(antigo));
+      Object.assign(novo, {
+        id: id || ("proc-" + Date.now()),
+        cnj: g("proc-cnj"), cliente: g("proc-cliente"), area: g("proc-area"),
+        status: g("proc-status"), obs: g("proc-obs"),
+        temPrazo: YESNO.prazo,
+        prazo: YESNO.prazo ? g("proc-prazo") : "",
+        prazoDesc: YESNO.prazo ? g("proc-prazo-desc") : "",
+        temAudiencia: YESNO.aud
+      });
+      if (!YESNO.prazo) { novo.prazoCumprido = false; novo.prazoCumpridoObs = ""; }
+      else if (antigo.prazo && antigo.prazo !== novo.prazo) { novo.prazoCumprido = false; }
 
-      if (id) {
-        // Editar
-        processos = processos.map(p => {
-          if (p.id === id) {
-            return { id, cnj, cliente, area, status, prazo, obs };
-          }
-          return p;
-        });
-      } else {
-        // Criar Novo
-        const newProc = {
-          id: "proc-" + Date.now(),
-          cnj,
-          cliente,
-          area,
-          status,
-          prazo,
-          obs
+      if (YESNO.aud) {
+        const antes = antigo.audiencia || {};
+        const campos = {
+          data: g("proc-aud-data"), hora: g("proc-aud-hora"), comarca: g("proc-aud-comarca"),
+          vara: g("proc-aud-vara"), tipo: g("proc-aud-tipo"), modo: g("proc-aud-modo"), local: g("proc-aud-local")
         };
-        processos.unshift(newProc);
+        const remarcada = antes.data !== campos.data || antes.hora !== campos.hora;
+        novo.audiencia = Object.assign({}, antes, campos, remarcada ? { cumprido: false, cumpridoObs: "", cumpridoEm: "" } : {});
+      } else {
+        novo.audiencia = {};
       }
+
+      if (id) processos = processos.map(p => p.id === id ? novo : p);
+      else processos.unshift(novo);
 
       saveStoredProcessos(processos);
       closeProcessModal();
@@ -1857,37 +2623,35 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
     function editProcesso(id) {
       const proc = getStoredProcessos().find(p => p.id === id);
-      if (proc) {
-        openProcessModal(proc);
-      }
+      if (proc) openProcessModal(proc);
     }
 
     function deleteProcesso(id) {
       if (confirm("Confirma a exclusão deste processo do sistema?")) {
-        const processos = getStoredProcessos().filter(p => p.id !== id);
-        saveStoredProcessos(processos);
+        saveStoredProcessos(getStoredProcessos().filter(p => p.id !== id));
       }
     }
 
-    // Modal Cliente
+    // ---------- Modal Cliente ----------
     function openClientModal(cli = null) {
-      const modal = document.getElementById("modal-cliente");
-      const title = document.getElementById("modal-cliente-title");
-
+      const $v = (id, v) => { document.getElementById(id).value = v == null ? "" : v; };
       if (cli) {
-        title.textContent = "Editar Cliente";
-        document.getElementById("cli-id").value = cli.id;
-        document.getElementById("cli-nome").value = cli.nome;
-        document.getElementById("cli-doc").value = cli.doc;
-        document.getElementById("cli-tel").value = cli.telefone;
-        document.getElementById("cli-email").value = cli.email;
+        document.getElementById("modal-cliente-title").textContent = "Editar Cliente";
+        const h = cli.honorarios || {}, b = cli.banco || {};
+        $v("cli-id", cli.id); $v("cli-nome", cli.nome); $v("cli-doc", cli.doc);
+        $v("cli-tel", cli.telefone); $v("cli-email", cli.email);
+        $v("cli-nasc", cli.nascimento); $v("cli-end", cli.endereco);
+        $v("cli-valor-causa", fmtMoeda(cli.valorCausa));
+        $v("cli-hon-valor", fmtMoeda(h.valor)); $v("cli-hon-forma", h.forma);
+        $v("cli-hon-pago", h.pago || "Não"); $v("cli-hon-obs", h.obs);
+        $v("cli-banco", b.banco); $v("cli-conta-tipo", b.tipo || ""); $v("cli-agencia", b.agencia);
+        $v("cli-conta", b.conta); $v("cli-pix", b.pix); $v("cli-titular", b.titular);
       } else {
-        title.textContent = "Cadastrar Novo Cliente";
+        document.getElementById("modal-cliente-title").textContent = "Cadastrar Novo Cliente";
         document.getElementById("form-cliente").reset();
-        document.getElementById("cli-id").value = "";
+        $v("cli-id", "");
       }
-
-      modal.classList.add("open");
+      document.getElementById("modal-cliente").classList.add("open");
     }
 
     function closeClientModal() {
@@ -1896,31 +2660,35 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
     function handleClienteSubmit(e) {
       e.preventDefault();
-      const id = document.getElementById("cli-id").value;
-      const nome = document.getElementById("cli-nome").value.trim();
-      const doc = document.getElementById("cli-doc").value.trim();
-      const telefone = document.getElementById("cli-tel").value.trim();
-      const email = document.getElementById("cli-email").value.trim();
-
+      const g = id => document.getElementById(id).value.trim();
+      const id = g("cli-id");
       let clientes = getStoredClientes();
+      const antigo = id ? (clientes.find(c => c.id === id) || {}) : {};
+      const novo = Object.assign(JSON.parse(JSON.stringify(antigo)), {
+        id: id || ("cli-" + Date.now()),
+        nome: g("cli-nome"), doc: g("cli-doc"), telefone: g("cli-tel"), email: g("cli-email"),
+        nascimento: g("cli-nasc"), endereco: g("cli-end"),
+        valorCausa: lerMoeda(g("cli-valor-causa")),
+        honorarios: {
+          valor: lerMoeda(g("cli-hon-valor")), forma: g("cli-hon-forma"),
+          pago: g("cli-hon-pago"), obs: g("cli-hon-obs")
+        },
+        banco: {
+          banco: g("cli-banco"), tipo: g("cli-conta-tipo"), agencia: g("cli-agencia"),
+          conta: g("cli-conta"), pix: g("cli-pix"), titular: g("cli-titular")
+        }
+      });
 
-      if (id) {
-        clientes = clientes.map(c => {
-          if (c.id === id) {
-            return { id, nome, doc, telefone, email };
-          }
-          return c;
-        });
-      } else {
-        const newCli = {
-          id: "cli-" + Date.now(),
-          nome,
-          doc,
-          telefone,
-          email
-        };
-        clientes.unshift(newCli);
+      // Se o nome mudou, atualiza os processos ligados a ele
+      if (antigo.nome && antigo.nome !== novo.nome) {
+        const procs = getStoredProcessos();
+        if (procs.some(p => p.cliente === antigo.nome)) {
+          saveStoredProcessos(procs.map(p => p.cliente === antigo.nome ? Object.assign({}, p, { cliente: novo.nome }) : p));
+        }
       }
+
+      if (id) clientes = clientes.map(c => c.id === id ? novo : c);
+      else clientes.unshift(novo);
 
       saveStoredClientes(clientes);
       closeClientModal();
@@ -1928,16 +2696,244 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
     function editCliente(id) {
       const cli = getStoredClientes().find(c => c.id === id);
-      if (cli) {
-        openClientModal(cli);
-      }
+      if (cli) openClientModal(cli);
     }
 
     function deleteCliente(id) {
       if (confirm("Confirma a exclusão deste cliente?")) {
-        const clientes = getStoredClientes().filter(c => c.id !== id);
-        saveStoredClientes(clientes);
+        saveStoredClientes(getStoredClientes().filter(c => c.id !== id));
       }
+    }
+
+    // Formata os campos de dinheiro ao sair do campo
+    document.addEventListener("focusout", ev => {
+      if (ev.target && ev.target.classList && ev.target.classList.contains("campo-moeda")) {
+        const n = lerMoeda(ev.target.value);
+        ev.target.value = n === null ? "" : fmtMoeda(n);
+      }
+    });
+
+    // ---------- Busca de publicações ----------
+    let PUB_CTX = { processo: "", nome: "", cpf: "" };
+
+    function abrirPublicacoes(origem, id) {
+      PUB_CTX = { processo: "", nome: "", cpf: "" };
+      let tipo = "processo";
+      if (origem === "processo") {
+        const p = getStoredProcessos().find(x => x.id === id);
+        if (p) {
+          PUB_CTX.processo = p.cnj || "";
+          PUB_CTX.nome = p.cliente || "";
+          const c = contatoCliente(p.cliente); if (c) PUB_CTX.cpf = c.doc || "";
+        }
+      } else {
+        const c = getStoredClientes().find(x => x.id === id);
+        if (c) { PUB_CTX.nome = c.nome || ""; PUB_CTX.cpf = c.doc || ""; }
+        tipo = "nome";
+      }
+      document.getElementById("pub-tipo").value = tipo;
+      document.getElementById("pub-ini").value = isoMaisDias(hojeISO(), -30);
+      document.getElementById("pub-fim").value = hojeISO();
+      document.getElementById("pub-status").innerHTML = "";
+      document.getElementById("pub-resultados").innerHTML = "";
+      pubAjustarCampo();
+      document.getElementById("modal-pub").classList.add("open");
+    }
+
+    function pubAjustarCampo() {
+      const tipo = document.getElementById("pub-tipo").value;
+      const termo = document.getElementById("pub-termo");
+      const dica = document.getElementById("pub-dica");
+      if (tipo === "processo") { termo.value = PUB_CTX.processo; dica.textContent = "Busca as intimações/publicações do processo no Diário de Justiça Eletrônico Nacional (todos os tribunais)."; }
+      else if (tipo === "nome") { termo.value = PUB_CTX.nome; dica.textContent = "Busca pelo nome exato da parte. Nomes comuns podem trazer homônimos — confira o número do processo."; }
+      else if (tipo === "cpf") { termo.value = PUB_CTX.cpf; dica.textContent = "O Comunica PJe não pesquisa por CPF. Use \"Abrir Consulta Processual TJRJ\": o CPF é copiado e basta colar (Ctrl+V) no campo do site do TJRJ."; }
+      else { termo.value = "182124"; dica.textContent = "Todas as publicações em nome do advogado (OAB/RJ 182.124)."; }
+    }
+
+    function copiar(txt) {
+      try { navigator.clipboard.writeText(txt); return true; } catch (e) { return false; }
+    }
+
+    function abrirSiteJustica(site) {
+      const tipo = document.getElementById("pub-tipo").value;
+      const termo = document.getElementById("pub-termo").value.trim();
+      if (termo) copiar(termo);
+      let url;
+      if (site === "tjrj") {
+        url = "https://www3.tjrj.jus.br/consultaprocessual/#/consultapublica" + (tipo === "nome" || tipo === "cpf" ? "#porNome" : "");
+      } else {
+        const q = new URLSearchParams();
+        if (tipo === "processo") q.set("numeroProcesso", termo.replace(/\D/g, ""));
+        else if (tipo === "nome") q.set("nomeParte", termo);
+        else if (tipo === "oab") { q.set("numeroOab", termo.replace(/\D/g, "")); q.set("ufOab", ESCRITORIO.ufOab); }
+        url = "https://comunica.pje.jus.br/consulta?" + q.toString();
+      }
+      window.open(url, "_blank", "noopener");
+      document.getElementById("pub-status").innerHTML = termo
+        ? '<div class="aviso-box">O termo <strong>' + escapeHtml(termo) + '</strong> foi copiado. Se o site não preencher sozinho, clique no campo de busca dele e cole (Ctrl+V).</div>'
+        : "";
+    }
+
+    async function buscarPublicacoes() {
+      const tipo = document.getElementById("pub-tipo").value;
+      const termo = document.getElementById("pub-termo").value.trim();
+      const st = document.getElementById("pub-status"), res = document.getElementById("pub-resultados");
+      res.innerHTML = "";
+      if (!termo) { st.innerHTML = '<div class="aviso-box">Informe o termo da busca.</div>'; return; }
+      if (tipo === "cpf") {
+        st.innerHTML = '<div class="aviso-box">O Comunica PJe não pesquisa por CPF/CNPJ. Clique em <strong>"Abrir Consulta Processual TJRJ"</strong> (o CPF será copiado) ou troque para "Nome da parte".</div>';
+        return;
+      }
+      const q = new URLSearchParams({ pagina: "1", itensPorPagina: "100" });
+      if (tipo === "processo") q.set("numeroProcesso", termo.replace(/\D/g, ""));
+      else if (tipo === "nome") q.set("nomeParte", termo);
+      else { q.set("numeroOab", termo.replace(/\D/g, "")); q.set("ufOab", ESCRITORIO.ufOab); }
+      const ini = document.getElementById("pub-ini").value, fim = document.getElementById("pub-fim").value;
+      if (ini) q.set("dataDisponibilizacaoInicio", ini);
+      if (fim) q.set("dataDisponibilizacaoFim", fim);
+
+      st.innerHTML = '<div class="hint">Consultando o Comunica PJe...</div>';
+      try {
+        const r = await fetch("https://comunicaapi.pje.jus.br/api/v1/comunicacao?" + q.toString(), { headers: { Accept: "application/json" } });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const j = await r.json();
+        const itens = j.items || j.itens || j.content || [];
+        if (!itens.length) {
+          st.innerHTML = '<div class="aviso-box" style="background:#f0fdf4;border-color:#bbf7d0;color:#14532d;">Nenhuma publicação encontrada no período informado.</div>';
+          return;
+        }
+        st.innerHTML = '<div class="hint">' + (j.count || itens.length) + " publicação(ões) encontrada(s).</div>";
+        res.innerHTML = itens.map(it => {
+          const data = it.data_disponibilizacao || it.dataDisponibilizacao || "";
+          const proc = it.numeroprocessocommascara || it.numero_processo || it.numeroProcesso || "";
+          const trib = it.siglaTribunal || it.sigla_tribunal || "";
+          const orgao = it.nomeOrgao || it.nome_orgao || "";
+          const tipoCom = it.tipoComunicacao || it.tipo_comunicacao || "";
+          const texto = String(it.texto || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          const link = it.link || "";
+          return `<div class="pub-item">
+            <div class="pub-cab">${escapeHtml(formatarDataBR(String(data).slice(0, 10)))} · ${escapeHtml(trib)} · ${escapeHtml(proc)}</div>
+            <div class="hint" style="margin:0 0 0.35rem;">${escapeHtml([tipoCom, orgao].filter(Boolean).join(" — "))}</div>
+            <div class="pub-txt">${escapeHtml(texto.slice(0, 1200))}${texto.length > 1200 ? "…" : ""}</div>
+            ${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener" style="font-size:0.8rem;">Abrir documento</a>` : ""}
+          </div>`;
+        }).join("");
+      } catch (err) {
+        console.warn("Comunica PJe:", err);
+        copiar(termo);
+        st.innerHTML = '<div class="aviso-box">O tribunal não permitiu a consulta direta pelo sistema neste momento. O termo foi copiado: clique em <strong>"Abrir Comunica PJe no site"</strong> e cole (Ctrl+V) se precisar.</div>';
+      }
+    }
+
+    // ---------- Salvar / Exportar ----------
+    function resumoDados() {
+      const el = document.getElementById("dados-resumo"); if (!el) return;
+      el.textContent = "Na nuvem agora: " + getStoredClientes().length + " cliente(s) e " +
+        getStoredProcessos().length + " processo(s).";
+    }
+
+    function nomeArquivo(ext) { return "jurispro-bergamini-" + hojeISO() + "." + ext; }
+
+    async function gravarArquivo(blob, nome, descricao, mime, ext) {
+      // "Salvar como": deixa escolher pasta e nome (Chrome/Edge). Nos outros, baixa direto.
+      if (window.showSaveFilePicker) {
+        try {
+          const h = await window.showSaveFilePicker({ suggestedName: nome, types: [{ description: descricao, accept: { [mime]: ["." + ext] } }] });
+          const w = await h.createWritable(); await w.write(blob); await w.close();
+          return;
+        } catch (e) { if (e && e.name === "AbortError") return; }
+      }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = nome;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+
+    function salvarComo() {
+      const dados = {
+        geradoEm: new Date().toISOString(), origem: "JurisPro Bergamini — cópia manual",
+        clientes: getStoredClientes(), processos: getStoredProcessos()
+      };
+      gravarArquivo(new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" }),
+        nomeArquivo("json"), "Cópia JurisPro", "application/json", "json");
+    }
+
+    function carregarXLSX() {
+      if (window.XLSX) return Promise.resolve(window.XLSX);
+      const carregar = src => new Promise((ok, falha) => {
+        const sc = document.createElement("script");
+        sc.src = src; sc.onload = () => ok(window.XLSX); sc.onerror = falha;
+        document.head.appendChild(sc);
+      });
+      // Arquivo guardado no próprio site; se faltar, usa a cópia pública
+      return carregar("vendor/xlsx.full.min.js")
+        .catch(() => carregar("https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"))
+        .catch(() => { throw new Error("Não foi possível carregar o gerador de planilhas. Verifique a internet."); });
+    }
+
+    async function exportarExcel() {
+      let X;
+      try { X = await carregarXLSX(); } catch (e) { alert(e.message); return; }
+      const clientes = getStoredClientes().map(c => {
+        const h = c.honorarios || {}, b = c.banco || {};
+        return {
+          "Nome / Razão Social": c.nome, "CPF/CNPJ": c.doc, "Telefone": c.telefone, "E-mail": c.email,
+          "Nascimento": formatarDataBR(c.nascimento || ""), "Endereço": c.endereco || "",
+          "Valor da Causa (R$)": c.valorCausa == null ? "" : c.valorCausa,
+          "Honorários (R$)": h.valor == null ? "" : h.valor, "Forma de pagamento": h.forma || "",
+          "Pago?": h.pago || "", "Obs. pagamento": h.obs || "",
+          "Banco": b.banco || "", "Tipo de conta": b.tipo || "", "Agência": b.agencia || "",
+          "Conta": b.conta || "", "PIX": b.pix || "", "Titular": b.titular || ""
+        };
+      });
+      const processos = getStoredProcessos().map(p => {
+        const a = p.audiencia || {};
+        return {
+          "Nº CNJ": p.cnj, "Cliente": p.cliente, "Área": p.area, "Status": p.status,
+          "Há prazo?": temPrazo(p) ? "Sim" : "Não", "Data do prazo": temPrazo(p) ? formatarDataBR(p.prazo) : "",
+          "O que fazer": p.prazoDesc || "", "Prazo cumprido?": temPrazo(p) ? (p.prazoCumprido ? "Sim" : "Não") : "",
+          "Há audiência?": temAudiencia(p) ? "Sim" : "Não",
+          "Data audiência": temAudiencia(p) ? formatarDataBR(a.data) : "", "Horário": a.hora || "",
+          "Comarca": a.comarca || "", "Vara": a.vara || "", "Tipo audiência": a.tipo || "",
+          "Modalidade": temAudiencia(p) ? (a.modo || "") : "", "Audiência cumprida?": temAudiencia(p) ? (a.cumprido ? "Sim" : "Não") : "",
+          "Observações": p.obs || ""
+        };
+      });
+      const tarefas = listarTarefas().map(t => ({
+        "Data": formatarDataBR(t.data), "Dia": diaSemana(t.data), "Horário": t.hora,
+        "Tipo": t.tipo === "audiencia" ? "Audiência" : "Prazo", "Nº CNJ": t.proc.cnj,
+        "Cliente": t.proc.cliente, "Descrição": t.desc, "Cumprido?": t.cumprido ? "Sim" : "Não",
+        "Informações": t.obs
+      }));
+      const wb = X.utils.book_new();
+      const aba = (linhas, nome) => {
+        const ws = X.utils.json_to_sheet(linhas.length ? linhas : [{ "(vazio)": "" }]);
+        const cab = Object.keys(linhas[0] || { "(vazio)": "" });
+        ws["!cols"] = cab.map(k => ({ wch: Math.min(45, Math.max(k.length + 2, ...linhas.map(l => String(l[k] == null ? "" : l[k]).length + 1))) }));
+        X.utils.book_append_sheet(wb, ws, nome);
+      };
+      aba(clientes, "Clientes"); aba(processos, "Processos"); aba(tarefas, "Tarefas");
+      const bin = X.write(wb, { bookType: "xlsx", type: "array" });
+      const mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      gravarArquivo(new Blob([bin], { type: mime }), nomeArquivo("xlsx"), "Planilha Excel", mime, "xlsx");
+    }
+
+    async function restaurarBackup() {
+      const f = document.getElementById("arq-restaurar").files[0];
+      if (!f) { alert("Escolha o arquivo .json da cópia."); return; }
+      let dados;
+      try { dados = JSON.parse(await f.text()); } catch (e) { alert("Arquivo inválido."); return; }
+      const cl = Array.isArray(dados.clientes) ? dados.clientes : [], pr = Array.isArray(dados.processos) ? dados.processos : [];
+      if (!cl.length && !pr.length) { alert("O arquivo não tem clientes nem processos."); return; }
+      if (!confirm("Restaurar " + cl.length + " cliente(s) e " + pr.length + " processo(s)? Registros com o mesmo código serão substituídos.")) return;
+      const juntar = (atual, novos) => {
+        const m = new Map(atual.map(x => [x.id, x]));
+        novos.filter(x => x && x.id).forEach(x => m.set(x.id, x));
+        return Array.from(m.values());
+      };
+      saveStoredClientes(juntar(getStoredClientes(), cl));
+      saveStoredProcessos(juntar(getStoredProcessos(), pr));
+      alert("Restauração enviada para a nuvem.");
     }
 
     // Classes utilitárias de badge
@@ -1993,7 +2989,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       const ordem = (a, b) => (parseInt(String(b.id).replace(/\D/g, "")) || 0) - (parseInt(String(a.id).replace(/\D/g, "")) || 0);
 
       window.JP = {
-        salvar: (col, x) => setDoc(doc(db, col, x.id), x),
+        salvar: (col, x) => setDoc(doc(db, col, x.id), JSON.parse(JSON.stringify(x))),
         excluir: (col, id) => deleteDoc(doc(db, col, id))
       };
 
@@ -2002,6 +2998,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         $("header-user-name").textContent = nome;
         $("avatar-initial").textContent = (nome || "?").trim().charAt(0).toUpperCase();
         $("btn-admin").style.display = admin ? "inline-flex" : "none";
+        $("bloco-restaurar").style.display = admin ? "block" : "none";
         loginView.style.display = "none";
         appView.style.display = "flex";
         const erro = e => { console.error(e); alert("Erro ao carregar dados: " + traduz(e)); };

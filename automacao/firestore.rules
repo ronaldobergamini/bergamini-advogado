@@ -1,0 +1,73 @@
+rules_version = '2';
+// =====================================================================
+// Regras de segurança do Firestore — JurisPro Bergamini
+// Colar em: Firebase Console > Firestore Database > Regras > Publicar
+//
+// • Clientes e processos (inclui dados bancários e honorários): só
+//   usuários APROVADOS (status "ativo") e o administrador principal.
+// • Ninguém de fora lê nada, exceto a tabela de nomes de usuário
+//   (necessária para entrar digitando o usuário em vez do e-mail).
+// • O script de e-mails automáticos usa a conta Google do advogado
+//   e não depende destas regras.
+// =====================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function logado() { return request.auth != null; }
+
+    function adminPrincipal() {
+      return logado()
+        && request.auth.token.email == 'ronaldobergamini.advogado@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function temPerfil() {
+      return logado() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function perfil() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function ativo() {
+      return adminPrincipal() || (temPerfil() && perfil().status == 'ativo');
+    }
+    function admin() {
+      return adminPrincipal() || (temPerfil() && perfil().perfil == 'admin' && perfil().status == 'ativo');
+    }
+
+    // Nome de usuário -> e-mail (consultado na tela de login, antes de entrar)
+    match /usernames/{u} {
+      allow read: if true;
+      allow create: if logado();
+      allow update, delete: if admin() || (logado() && resource.data.uid == request.auth.uid);
+    }
+
+    // Perfis de usuário e pedidos de acesso
+    match /users/{uid} {
+      allow read: if admin() || (logado() && request.auth.uid == uid);
+      // Pedido de acesso: o próprio usuário cria o seu, sempre como "pendente"
+      allow create: if admin()
+        || (logado() && request.auth.uid == uid
+            && request.resource.data.status == 'pendente'
+            && request.resource.data.perfil == 'usuario');
+      // O próprio usuário só altera dados que não mudam status nem perfil
+      allow update: if admin()
+        || (logado() && request.auth.uid == uid
+            && request.resource.data.status == resource.data.status
+            && request.resource.data.perfil == resource.data.perfil);
+      allow delete: if admin();
+    }
+
+    // Dados do escritório
+    match /processos/{id} {
+      allow read, write: if ativo();
+    }
+    match /clientes/{id} {
+      allow read, write: if ativo();
+    }
+
+    // Qualquer outra coleção: fechada
+    match /{caminho=**} {
+      allow read, write: if false;
+    }
+  }
+}
