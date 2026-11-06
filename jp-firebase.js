@@ -17,6 +17,7 @@ export const CONFIG = window.FIREBASE_CONFIG || {};
 export const CONFIG_OK = !!(CONFIG.apiKey && CONFIG.projectId && !/COLE/i.test(CONFIG.apiKey));
 export const ADMIN_EMAIL = String(window.ADMIN_EMAIL || "").trim().toLowerCase();
 export const ADMIN_USUARIO = String(window.ADMIN_USUARIO || "").trim().toLowerCase();
+export const AVISO_EMAIL = String(window.AVISO_EMAIL || window.ADMIN_EMAIL || "").trim().toLowerCase();
 export const ZAP_ADMIN = String(window.WHATSAPP_ADMIN || "").replace(/\D/g, "");
 export const SITE = "https://bergaminiadvocacia.com.br";
 
@@ -135,8 +136,8 @@ export function traduz(err) {
 
 /* Aviso por e-mail ao administrador (FormSubmit — na 1ª vez pede ativação no e-mail) */
 export function avisarEmail(dados) {
-  if (!ADMIN_EMAIL) return Promise.resolve();
-  return fetch("https://formsubmit.co/ajax/" + ADMIN_EMAIL, {
+  if (!AVISO_EMAIL) return Promise.resolve();
+  return fetch("https://formsubmit.co/ajax/" + AVISO_EMAIL, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Accept": "application/json" },
     body: JSON.stringify(Object.assign({ _template: "table", _captcha: "false" }, dados))

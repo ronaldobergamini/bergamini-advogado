@@ -1,5 +1,5 @@
 /* ============================================================
-   CONFIGURAÇÃO DO FIREBASE — Bergamini Advogado (projeto bergamini-advogado)
+   CONFIGURAÇÃO DO FIREBASE — Bergamini Advocacia (projeto bergamini-advogado)
    ============================================================ */
 window.FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAER0e6pww5ayH47JQKjnacQW65GwRj6UU",
@@ -11,9 +11,13 @@ window.FIREBASE_CONFIG = {
   measurementId:     "G-QEFF7TRVVT"
 };
 
-/* Administrador principal (tem controle total) */
+/* Administrador principal (tem controle total) — e-mail de LOGIN da Área Interna.
+   Não trocar aqui sem antes criar esse login no Firebase Authentication. */
 window.ADMIN_EMAIL    = "ronaldobergamini.advogado@gmail.com";
+
+/* E-mail que recebe os avisos de solicitação de cadastro */
+window.AVISO_EMAIL    = "contato.bergaminiadvocacia@gmail.com";
 window.ADMIN_USUARIO  = "ronaldo.neto";
 
 /* WhatsApp que recebe o aviso de cada novo pedido de acesso */
-window.WHATSAPP_ADMIN = "5521998075723";
+window.WHATSAPP_ADMIN = "5521999226406";

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
-  <title>Administração | Bergamini Advogado</title>
+  <title>Administração | Bergamini Advocacia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -96,7 +96,7 @@
 </head>
 <body>
   <header class="topo">
-    <div class="marca">BERGAMINI ADVOGADO <small>JURISPRO · ADMINISTRAÇÃO</small></div>
+    <div class="marca">BERGAMINI ADVOCACIA <small>JURISPRO · ADMINISTRAÇÃO</small></div>
     <div class="topo-acoes">
       <span id="quem"></span>
       <a class="btn-topo" href="jurispro_gest_o_processual_2_.html">&larr; Área Interna</a>
@@ -339,7 +339,7 @@
       try {
         if (acao === "aprovar" || acao === "ativar") {
           await updateDoc(doc(db, "users", u.uid), { status: "ativo", aprovadoEm: serverTimestamp(), aprovadoPor: meuPerfil.usuario || eu.email });
-          const texto = "Olá, " + (u.nome || "").split(" ")[0] + "! Seu acesso à Área Interna do escritório Bergamini Advogado foi liberado.\n" +
+          const texto = "Olá, " + (u.nome || "").split(" ")[0] + "! Seu acesso à Área Interna do escritório Bergamini Advocacia foi liberado.\n" +
             "Entre em " + SITE + "/" + AREA + " com o usuário *" + u.usuario + "* e a senha que você cadastrou.";
           const z = soDigitos(u.whatsapp);
           msg("msg-geral", "✓ Acesso de <strong>" + esc(u.nome) + "</strong> liberado." +
@@ -429,7 +429,7 @@
           await signOut(secAuth);
           await setDoc(doc(db, "users", cred.user.uid), Object.assign({ email, motivo: "Cadastrado pelo administrador", criadoEm: serverTimestamp(), criadoPor: meuPerfil.usuario || eu.email }, dados));
           await setDoc(doc(db, "usernames", dados.usuario), { uid: cred.user.uid, email });
-          const texto = "Olá, " + dados.nome.split(" ")[0] + "! Seu acesso à Área Interna do escritório Bergamini Advogado foi criado.\n" +
+          const texto = "Olá, " + dados.nome.split(" ")[0] + "! Seu acesso à Área Interna do escritório Bergamini Advocacia foi criado.\n" +
             "Endereço: " + SITE + "/" + AREA + "\nUsuário: *" + dados.usuario + "*\nSenha provisória: *" + senha + "*";
           const z = soDigitos(dados.whatsapp);
           msg("msg-geral", "✓ Usuário <strong>" + esc(dados.usuario) + "</strong> criado. Senha provisória: <strong>" + esc(senha) + "</strong>" +
