@@ -5,8 +5,13 @@ rules_version = '2';
 //
 // • Clientes e processos (inclui dados bancários e honorários): só
 //   usuários APROVADOS (status "ativo") e o administrador principal.
+// • Permissões por usuário (definidas pelo administrador na aprovação):
+//   Visualizar (ler), Incluir (criar), Editar (alterar e excluir).
+//   Perfis antigos, sem o campo "permissoes", seguem com acesso completo.
 // • Ninguém de fora lê nada, exceto a tabela de nomes de usuário
-//   (necessária para entrar digitando o usuário em vez do e-mail).
+//   (necessária para entrar digitando o usuário em vez do e-mail) e a
+//   Consulta Processual do site (coleção "consulta": só número do
+//   processo, status, prazo em aberto e audiência agendada).
 // • O script de e-mails automáticos usa a conta Google do advogado
 //   e não depende destas regras.
 // =====================================================================
@@ -33,6 +38,14 @@ service cloud.firestore {
     function admin() {
       return adminPrincipal() || (temPerfil() && perfil().perfil == 'admin' && perfil().status == 'ativo');
     }
+    // p = 'visualizar' | 'incluir' | 'editar'
+    function pode(p) {
+      return admin() || (ativo() && (
+        !('permissoes' in perfil())
+        || perfil().permissoes.get(p, false) == true
+        || (p == 'visualizar' && (perfil().permissoes.get('incluir', false) == true || perfil().permissoes.get('editar', false) == true))
+      ));
+    }
 
     // Nome de usuário -> e-mail (consultado na tela de login, antes de entrar)
     match /usernames/{u} {
@@ -48,21 +61,35 @@ service cloud.firestore {
       allow create: if admin()
         || (logado() && request.auth.uid == uid
             && request.resource.data.status == 'pendente'
-            && request.resource.data.perfil == 'usuario');
-      // O próprio usuário só altera dados que não mudam status nem perfil
+            && request.resource.data.perfil == 'usuario'
+            && !('permissoes' in request.resource.data));
+      // O próprio usuário só altera dados que não mudam status, perfil nem permissões
       allow update: if admin()
         || (logado() && request.auth.uid == uid
             && request.resource.data.status == resource.data.status
-            && request.resource.data.perfil == resource.data.perfil);
+            && request.resource.data.perfil == resource.data.perfil
+            && request.resource.data.get('permissoes', null) == resource.data.get('permissoes', null));
       allow delete: if admin();
     }
 
     // Dados do escritório
     match /processos/{id} {
-      allow read, write: if ativo();
+      allow read: if pode('visualizar');
+      allow create: if pode('incluir');
+      allow update, delete: if pode('editar');
     }
     match /clientes/{id} {
-      allow read, write: if ativo();
+      allow read: if pode('visualizar');
+      allow create: if pode('incluir');
+      allow update, delete: if pode('editar');
+    }
+
+    // Consulta Processual pública do site (leitura aberta)
+    match /consulta/{numero} {
+      allow read: if true;
+      allow create: if pode('incluir') || pode('editar');
+      allow update: if pode('incluir') || pode('editar');
+      allow delete: if pode('editar');
     }
 
     // Qualquer outra coleção: fechada

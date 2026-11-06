@@ -8,6 +8,8 @@
      • Toda sexta ~8h ....... resumo das tarefas de seg a sex da semana
                               seguinte para o advogado
      • Todo domingo ~3h ..... cópia de segurança dos dados no OneDrive
+     • A cada 5 minutos ..... e-mail avisando de novo pedido de acesso
+                              à Área Interna, com botões para aprovar
 
    COMO INSTALAR: veja o arquivo LEIA-ME.md nesta mesma pasta.
    Depois de colar, rode UMA vez a função  instalar  (menu Executar).
@@ -32,15 +34,27 @@ const CFG = {
 
 /* ============================ INSTALAÇÃO ============================ */
 
-/** Rode esta função UMA vez. Ela cria os 3 agendamentos automáticos. */
+/** Rode esta função UMA vez. Ela cria os 4 agendamentos automáticos. */
 function instalar() {
   ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger("rotinaDiaria").timeBased().everyDays(1).atHour(7).inTimezone(CFG.fuso).create();
   ScriptApp.newTrigger("resumoSemanal").timeBased().onWeekDay(ScriptApp.WeekDay.FRIDAY).atHour(8).inTimezone(CFG.fuso).create();
   ScriptApp.newTrigger("rotinaBackup").timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(3).inTimezone(CFG.fuso).create();
+  ScriptApp.newTrigger("avisarCadastros").timeBased().everyMinutes(5).create();
   // Teste de leitura do banco para já pedir as autorizações
   const n = lerColecao("processos").length;
   Logger.log("Instalado. Processos encontrados no banco: " + n);
+}
+
+/** Liga SÓ o aviso de novos cadastros (a cada 5 min), sem mexer nos outros agendamentos.
+    Rode UMA vez se as outras automações já estavam instaladas. */
+function ativarAvisoCadastro() {
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === "avisarCadastros")
+    .forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger("avisarCadastros").timeBased().everyMinutes(5).create();
+  avisarCadastros();
+  Logger.log("Aviso de cadastro ativado. Pedidos pendentes já avisados agora: veja seu e-mail.");
 }
 
 /** Manda para o advogado um e-mail de teste com o resumo da próxima semana. */
@@ -139,6 +153,55 @@ function resumoSemanal(teste) {
   enviar(CFG.emailAdvogado,
     (teste ? "[TESTE] " : "") + "Agenda da semana " + dataBR(seg) + " a " + dataBR(sex) + " — " + tarefas.length + " tarefa(s)",
     moldura("Agenda da próxima semana", corpo));
+}
+
+/* ===================== AVISO DE NOVO PEDIDO DE ACESSO ===================== */
+/** Procura pedidos de acesso pendentes que ainda não foram avisados e manda um
+    e-mail com botões para aprovar já escolhendo as permissões. */
+function avisarCadastros() {
+  try {
+    lerDocs("users")
+      .filter(u => u.status === "pendente" && !u.avisoCadastro)
+      .forEach(u => {
+        enviar(CFG.emailAdvogado,
+          "Novo pedido de acesso à Área Interna — " + (u.nome || u.usuario || u.email || ""),
+          emailNovoCadastro(u));
+        gravarCampo("users", u._docId, "avisoCadastro", new Date().toISOString());
+      });
+  } catch (e) {
+    // Roda a cada 5 min: avisa a falha no máximo uma vez por dia
+    const props = PropertiesService.getScriptProperties();
+    if (props.getProperty("erroCadastroDia") !== hojeISO()) {
+      props.setProperty("erroCadastroDia", hojeISO());
+      avisarErro("aviso de novo cadastro", e);
+    }
+  }
+}
+
+function emailNovoCadastro(u) {
+  const base = CFG.site + "/admin.html?aprovar=" + encodeURIComponent(u._docId);
+  const botao = (rotulo, p, destaque) =>
+    "<a href='" + base + "&p=" + p + "' style='display:block;text-decoration:none;text-align:center;margin:6px 0;padding:11px 14px;border-radius:5px;font-weight:600;" +
+    (destaque ? "background:#C49A5A;color:#061529;border:1px solid #C49A5A" : "background:#ffffff;color:#061529;border:1px solid #C49A5A") +
+    "'>" + rotulo + "</a>";
+  const linhas = [
+    ["Nome", u.nome || "—"],
+    ["Usuário", u.usuario || "—"],
+    ["E-mail", u.email || "—"],
+    ["WhatsApp", u.whatsapp || "—"],
+    ["Motivo", u.motivo || "—"],
+    ["Pedido em", u.criadoEm ? Utilities.formatDate(new Date(u.criadoEm), CFG.fuso, "dd/MM/yyyy HH:mm") : "—"]
+  ];
+  return moldura("Novo pedido de acesso à Área Interna",
+    "<p>Uma pessoa pediu acesso ao sistema JurisPro:</p>" + fichaHtml(linhas) +
+    "<p style='margin-top:20px'><b>Aprovar com as permissões:</b></p>" +
+    botao("Somente Visualizar", "v") +
+    botao("Visualizar + Incluir", "vi") +
+    botao("Visualizar + Editar", "ve") +
+    botao("Acesso completo (Visualizar + Incluir + Editar)", "vie", true) +
+    "<p style='margin-top:14px'>Ou <a href='" + base + "'>abra o painel para escolher as permissões ou recusar o pedido</a>.</p>" +
+    "<p style='color:#64748b;font-size:12px'>O botão abre a tela de Administração com as permissões já marcadas; " +
+    "confira e clique em <b>Aprovar</b>. Se pedir login, entre com seu usuário de administrador: depois do login você volta direto para esta aprovação.</p>");
 }
 
 /* ======================= PUBLICAÇÕES (Comunica PJe) ======================= */
@@ -375,6 +438,25 @@ function lerColecao(nome) {
     if (r.getResponseCode() !== 200) throw new Error("Firestore " + nome + ": HTTP " + r.getResponseCode() + " — " + r.getContentText().slice(0, 300));
     const j = JSON.parse(r.getContentText());
     (j.documents || []).forEach(d => out.push(decodificar({ mapValue: { fields: d.fields || {} } })));
+    token = j.nextPageToken || "";
+  } while (token);
+  return out;
+}
+
+/** Igual a lerColecao, mas guarda o ID do documento em _docId (necessário para a coleção users). */
+function lerDocs(nome) {
+  const out = [];
+  let token = "";
+  do {
+    const url = baseUrl() + nome + "?pageSize=300" + (token ? "&pageToken=" + encodeURIComponent(token) : "");
+    const r = UrlFetchApp.fetch(url, { headers: auth(), muteHttpExceptions: true });
+    if (r.getResponseCode() !== 200) throw new Error("Firestore " + nome + ": HTTP " + r.getResponseCode() + " — " + r.getContentText().slice(0, 300));
+    const j = JSON.parse(r.getContentText());
+    (j.documents || []).forEach(d => {
+      const o = decodificar({ mapValue: { fields: d.fields || {} } });
+      o._docId = String(d.name).split("/").pop();
+      out.push(o);
+    });
     token = j.nextPageToken || "";
   } while (token);
   return out;
