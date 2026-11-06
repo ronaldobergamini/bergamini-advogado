@@ -1,5 +1,5 @@
 /* =====================================================================
-   JurisPro — Bergamini Advogado — AUTOMAÇÕES (Google Apps Script)
+   JurisPro — Bergamini Advocacia — AUTOMAÇÕES (Google Apps Script)
    ---------------------------------------------------------------------
    Roda no Google, sozinho, sem ninguém abrir o sistema:
      • Todo dia ~7h ......... lembrete de audiência 2 dias antes
@@ -15,12 +15,12 @@
 
 const CFG = {
   projetoFirebase: "bergamini-advogado",
-  emailAdvogado: "ronaldobergamini.advogado@gmail.com",
+  emailAdvogado: "contato.bergaminiadvocacia@gmail.com",
   nomeAdvogado: "Dr. Ronaldo Bergamini",
-  telefoneAdvogado: "(21) 99807-5723",
+  telefoneAdvogado: "(21) 99922-6406",
   oab: "182124",
   ufOab: "RJ",
-  nomeEscritorio: "Bergamini Advogado",
+  nomeEscritorio: "Bergamini Advocacia",
   site: "https://bergaminiadvocacia.com.br",
   fuso: "America/Sao_Paulo",
   diasAntesAudiencia: 2,
@@ -326,7 +326,7 @@ function emailAudienciaCliente(p, a, cli) {
 function moldura(titulo, corpo) {
   return "<div style='font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:auto;color:#1c1c1c'>" +
     "<div style='background:#061529;border-bottom:3px solid #C49A5A;padding:16px 20px;color:#fff'>" +
-    "<div style='font-family:Georgia,serif;font-size:20px;letter-spacing:2px'>BERGAMINI <span style='color:#C49A5A;font-size:13px'>ADVOGADO</span></div>" +
+    "<div style='font-family:Georgia,serif;font-size:20px;letter-spacing:2px'>BERGAMINI <span style='color:#C49A5A;font-size:13px'>ADVOCACIA</span></div>" +
     "<div style='font-size:14px;color:#d8dee8;margin-top:4px'>" + esc(titulo) + "</div></div>" +
     "<div style='padding:18px 20px;font-size:14px;line-height:1.55'>" + corpo + "</div>" +
     "<div style='padding:12px 20px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e6ea'>" +
