@@ -9,7 +9,7 @@ import {
   reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection,
+  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection,
   onSnapshot, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -28,7 +28,7 @@ export const db = app ? getFirestore(app) : null;
 export {
   onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut,
   sendPasswordResetEmail, sendEmailVerification, updatePassword, reauthenticateWithCredential,
-  EmailAuthProvider, initializeApp, getAuth, doc, getDoc, setDoc, updateDoc, deleteDoc,
+  EmailAuthProvider, initializeApp, getAuth, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
   collection, onSnapshot, query, where, serverTimestamp
 };
 
@@ -73,6 +73,35 @@ export function ehAdminEmail(user) {
 export function ehAdmin(user, perfil) {
   return (ehAdminEmail(user) && user.emailVerified) ||
     (!!perfil && perfil.perfil === "admin" && perfil.status === "ativo");
+}
+
+/* ---------- Permissões de uso (Visualizar / Incluir / Editar) ----------
+   Incluir e Editar sempre trazem Visualizar junto (não dá para incluir um processo
+   sem ver a lista de clientes, nem editar o que não se vê).
+   Perfis antigos, sem o campo "permissoes", continuam com acesso completo. */
+export const PERM_TOTAL = { visualizar: true, incluir: true, editar: true };
+export function normPerm(p) {
+  p = p || {};
+  const incluir = !!p.incluir, editar = !!p.editar;
+  return { visualizar: !!p.visualizar || incluir || editar, incluir, editar };
+}
+export function permissoesDe(user, perfil) {
+  if (ehAdminEmail(user)) return Object.assign({}, PERM_TOTAL);
+  if (!perfil || perfil.perfil === "admin" || !perfil.permissoes) return Object.assign({}, PERM_TOTAL);
+  return normPerm(perfil.permissoes);
+}
+/* "v", "vi", "ve", "vie" (usado nos links do e-mail) <-> objeto */
+export function permDeCodigo(c) {
+  c = String(c || "").toLowerCase();
+  return normPerm({ visualizar: c.includes("v"), incluir: c.includes("i"), editar: c.includes("e") });
+}
+export function textoPerm(u) {
+  if (!u) return "";
+  if (u.perfil === "admin") return "Acesso total (administrador)";
+  if (!u.permissoes) return "Visualizar · Incluir · Editar";
+  const p = normPerm(u.permissoes);
+  const t = [p.visualizar && "Visualizar", p.incluir && "Incluir", p.editar && "Editar"].filter(Boolean);
+  return t.length ? t.join(" · ") : "Nenhuma";
 }
 
 /* Usuário ou e-mail -> e-mail do login */

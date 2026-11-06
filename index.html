@@ -1081,6 +1081,72 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       margin: 0;
     }
 
+    /* Consulta Processual */
+    .consulta-panel {
+      max-width: 760px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid var(--c-border);
+      border-top: 3px solid var(--c-gold);
+      border-radius: 8px;
+      padding: 2.25rem 2rem;
+      box-shadow: 0 4px 20px rgba(6, 21, 41, 0.04);
+    }
+    .busca-wrap { position: relative; }
+    .busca-campo { position: relative; }
+    .busca-campo svg {
+      position: absolute; left: 0.95rem; top: 50%; transform: translateY(-50%);
+      width: 19px; height: 19px; stroke: var(--c-gold); stroke-width: 2; fill: none; pointer-events: none;
+    }
+    .busca-campo .form-control {
+      padding: 0.95rem 1rem 0.95rem 2.75rem;
+      font-size: 1.05rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+    .busca-dica { font-size: 0.82rem; color: var(--c-text-muted); margin: 0.55rem 0 0; }
+    .sugestoes {
+      position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20;
+      list-style: none; margin: 0; padding: 0.35rem 0;
+      background: #ffffff; border: 1px solid var(--c-gold); border-radius: 6px;
+      box-shadow: 0 12px 30px rgba(6, 21, 41, 0.14);
+      max-height: 320px; overflow-y: auto; display: none;
+    }
+    .sugestoes.aberta { display: block; }
+    .sugestoes li {
+      padding: 0.7rem 1rem; cursor: pointer; font-variant-numeric: tabular-nums;
+      color: var(--c-navy); font-size: 0.98rem; display: flex; justify-content: space-between; gap: 1rem; align-items: center;
+    }
+    .sugestoes li:hover, .sugestoes li.ativa { background: var(--c-light-gray); }
+    .sugestoes li mark { background: rgba(196, 154, 90, 0.28); color: inherit; border-radius: 2px; padding: 0 1px; }
+    .sugestoes li small { color: var(--c-text-muted); font-size: 0.76rem; white-space: nowrap; }
+    .sugestoes li.vazia { cursor: default; color: var(--c-text-muted); font-size: 0.9rem; }
+    .sugestoes li.vazia:hover { background: transparent; }
+
+    .resultado { margin-top: 1.75rem; display: none; }
+    .resultado.show { display: block; animation: fadeInView 0.3s ease-out; }
+    .res-topo {
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+      padding-bottom: 1rem; border-bottom: 1px solid var(--c-border); margin-bottom: 1.25rem;
+    }
+    .res-num { font-family: var(--font-serif); font-size: 1.45rem; color: var(--c-navy); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .res-rotulo { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c-gold); font-weight: 600; display: block; margin-bottom: 0.15rem; }
+    .res-status { font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.75rem; border-radius: 999px; background: var(--c-light-gray); border: 1px solid var(--c-border); color: var(--c-navy); }
+    .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .res-bloco { border: 1px solid var(--c-border); border-radius: 6px; padding: 1.25rem 1.2rem; background: var(--c-light-gray); }
+    .res-bloco.sim { background: #fffaf1; border-color: rgba(196, 154, 90, 0.55); }
+    .res-bloco h4 { font-family: var(--font-sans); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 0.6rem; color: var(--c-navy); display: flex; align-items: center; gap: 0.5rem; }
+    .res-bloco h4 svg { width: 17px; height: 17px; stroke: var(--c-gold); stroke-width: 1.8; fill: none; }
+    .res-sit { font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem; color: var(--c-navy); }
+    .res-bloco:not(.sim) .res-sit { color: var(--c-text-muted); font-weight: 500; margin: 0; }
+    .res-dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 0.9rem; font-size: 0.9rem; }
+    .res-dl dt { color: var(--c-text-muted); }
+    .res-dl dd { margin: 0; color: var(--c-text-body); font-weight: 500; overflow-wrap: anywhere; }
+    .res-dl dd a { color: var(--c-navy); }
+    .res-nada { text-align: center; padding: 1.5rem 1rem 0.5rem; color: var(--c-text-body); }
+    .res-nada strong { color: var(--c-navy); }
+    .consulta-nota { font-size: 0.8rem; color: #64748b; margin: 1.5rem 0 0; line-height: 1.5; text-align: center; }
+
     /* Print styles */
     @media print {
       .site-header, .site-footer, .hero-actions, .btn-internal, .btn-whatsapp, form {
@@ -1163,6 +1229,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       .contact-form-panel {
         padding: 1.75rem 1.25rem;
       }
+      .consulta-panel { padding: 1.6rem 1.15rem; }
+      .res-grid { grid-template-columns: 1fr; }
     }
   </style>
   <!-- Contagem de acessos: Google Analytics 4 (mesmo projeto do Firebase) com Modo de Consentimento (LGPD) -->
@@ -1251,6 +1319,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <ul class="nav-links" id="navLinks">
           <li><a href="#home" class="nav-link" data-route="home">Home</a></li>
           <li><a href="#areas" class="nav-link" data-route="areas">Áreas de Atuação</a></li>
+          <li><a href="#consulta" class="nav-link" data-route="consulta">Consulta Processual</a></li>
           <li><a href="#contato" class="nav-link" data-route="contato">Fale Conosco</a></li>
           <li>
             <!-- Link relativo para a pasta coexistente com o sistema interno -->
@@ -1639,6 +1708,42 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
   </section>
 
   <!-- ========================================== -->
+  <!-- SEÇÃO: CONSULTA PROCESSUAL (#consulta)     -->
+  <!-- ========================================== -->
+  <section id="view-consulta" class="spa-view section-wrap alt-bg">
+    <div class="container-custom">
+      <div class="section-header-block">
+        <span class="section-label">Acompanhamento</span>
+        <h2 class="section-heading">Consulta Processual</h2>
+        <p class="section-desc">
+          Digite o número do seu processo para saber se há prazo em aberto ou audiência agendada.
+        </p>
+      </div>
+
+      <div class="consulta-panel">
+        <div class="busca-wrap">
+          <label for="busca-processo" class="form-label">Número do processo</label>
+          <div class="busca-campo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+            <input type="text" id="busca-processo" class="form-control" inputmode="numeric" autocomplete="off"
+              placeholder="0000000-00.0000.0.00.0000" role="combobox" aria-expanded="false"
+              aria-controls="lista-sugestoes" aria-autocomplete="list">
+          </div>
+          <ul class="sugestoes" id="lista-sugestoes" role="listbox" aria-label="Processos encontrados"></ul>
+          <p class="busca-dica" id="busca-dica">Comece a digitar: a partir de 4 números aparecem os processos parecidos para você escolher.</p>
+        </div>
+
+        <div class="resultado" id="resultado-consulta" aria-live="polite"></div>
+
+        <p class="consulta-nota">
+          Informações registradas pelo escritório, atualizadas conforme o acompanhamento do processo. Confirme datas sempre com o advogado ou no site do tribunal.
+          Dúvidas: <a href="https://wa.me/5521999226406" target="_blank" rel="noopener noreferrer">WhatsApp (21) 99922-6406</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
   <!-- SEÇÃO 3: FALE CONOSCO (#contato)           -->
   <!-- ========================================== -->
   <section id="view-contato" class="spa-view section-wrap">
@@ -1829,6 +1934,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           <ul class="footer-nav-list">
             <li><a href="#home" class="footer-nav-link">Home</a></li>
             <li><a href="#areas" class="footer-nav-link">Áreas de Atuação</a></li>
+            <li><a href="#consulta" class="footer-nav-link">Consulta Processual</a></li>
             <li><a href="#contato" class="footer-nav-link">Fale Conosco</a></li>
             <li>
               <!-- Link coexistente no mesmo diretório -->
@@ -1880,6 +1986,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       const views = {
         home: document.getElementById('view-home'),
         areas: document.getElementById('view-areas'),
+        consulta: document.getElementById('view-consulta'),
         contato: document.getElementById('view-contato')
       };
 
@@ -1923,6 +2030,9 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
         // Scroll suave para o topo ao trocar de rota
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Consulta processual: carrega a lista de processos ao abrir a seção
+        if (hash === 'consulta' && window.ConsultaProcessual) window.ConsultaProcessual.abrir();
       }
 
       window.addEventListener('hashchange', handleRoute);
@@ -2159,6 +2269,162 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 })();
 
 </script>
+  <!-- Consulta Processual: lê a coleção pública "consulta" do Firebase -->
+  <script src="firebase-config.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const campo = document.getElementById("busca-processo");
+    const lista = document.getElementById("lista-sugestoes");
+    const dica = document.getElementById("busca-dica");
+    const saida = document.getElementById("resultado-consulta");
+    const MIN = 4, MAX = 8;
+    let dados = null, carregando = null, itens = [], ativo = -1;
+
+    const so = t => String(t || "").replace(/\D/g, "");
+    const esc = t => String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const hoje = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+    const dataBR = iso => { const p = String(iso || "").split("-"); return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : (iso || ""); };
+    const DIAS = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+    const dia = iso => iso ? DIAS[new Date(iso + "T12:00:00").getDay()] : "";
+    // Formata 20 dígitos no padrão CNJ: NNNNNNN-DD.AAAA.J.TR.OOOO
+    const fmtCNJ = n => n.length === 20 ? n.replace(/^(\d{7})(\d{2})(\d{4})(\d)(\d{2})(\d{4})$/, "$1-$2.$3.$4.$5.$6") : n;
+    const rotulo = r => r.cnj || fmtCNJ(r.numero);
+
+    function carregar() {
+      if (dados) return Promise.resolve(dados);
+      if (carregando) return carregando;
+      const cfg = window.FIREBASE_CONFIG;
+      if (!cfg || !cfg.apiKey) return Promise.reject(new Error("sem configuração"));
+      const db = getFirestore(initializeApp(cfg, "consulta-publica"));
+      dica.textContent = "Carregando a lista de processos...";
+      carregando = getDocs(collection(db, "consulta")).then(s => {
+        dados = s.docs.map(d => Object.assign({ numero: d.id }, d.data()));
+        dica.textContent = "Comece a digitar: a partir de " + MIN + " números aparecem os processos parecidos para você escolher.";
+        return dados;
+      }).catch(e => {
+        carregando = null;
+        console.error(e);
+        dica.textContent = "Não foi possível carregar a consulta agora. Tente de novo em instantes ou fale conosco pelo WhatsApp.";
+        throw e;
+      });
+      return carregando;
+    }
+
+    // Destaca o trecho digitado dentro do número formatado
+    function destacar(texto, digitos) {
+      const mapa = []; let limpo = "";
+      for (let i = 0; i < texto.length; i++) if (/\d/.test(texto[i])) { mapa.push(i); limpo += texto[i]; }
+      const k = limpo.indexOf(digitos);
+      if (k < 0 || !digitos) return esc(texto);
+      const ini = mapa[k], fim = mapa[k + digitos.length - 1] + 1;
+      return esc(texto.slice(0, ini)) + "<mark>" + esc(texto.slice(ini, fim)) + "</mark>" + esc(texto.slice(fim));
+    }
+
+    function fecharLista() {
+      lista.classList.remove("aberta"); lista.innerHTML = ""; itens = []; ativo = -1;
+      campo.setAttribute("aria-expanded", "false"); campo.removeAttribute("aria-activedescendant");
+    }
+
+    function mostrarLista(digitos) {
+      const achados = dados
+        .filter(r => so(r.numero).includes(digitos))
+        .sort((a, b) => (so(b.numero).startsWith(digitos) - so(a.numero).startsWith(digitos)) || rotulo(a).localeCompare(rotulo(b)));
+      itens = achados.slice(0, MAX); ativo = -1;
+      if (!itens.length) {
+        lista.innerHTML = '<li class="vazia" role="option" aria-disabled="true">Nenhum processo encontrado com esses números.</li>';
+      } else {
+        lista.innerHTML = itens.map((r, i) =>
+          '<li role="option" id="sug-' + i + '" data-i="' + i + '">' +
+          '<span>' + destacar(rotulo(r), digitos) + '</span>' +
+          '<small>' + [r.prazo && "prazo em aberto", r.audiencia && r.audiencia.data >= hoje() && "audiência agendada"].filter(Boolean).join(" · ") + '</small></li>'
+        ).join("") + (achados.length > MAX ? '<li class="vazia">… e mais ' + (achados.length - MAX) + '. Continue digitando para filtrar.</li>' : "");
+      }
+      lista.classList.add("aberta"); campo.setAttribute("aria-expanded", "true");
+    }
+
+    function marcar(i) {
+      [...lista.querySelectorAll("li[data-i]")].forEach(li => li.classList.toggle("ativa", +li.dataset.i === i));
+      ativo = i;
+      if (i >= 0) { campo.setAttribute("aria-activedescendant", "sug-" + i); const el = document.getElementById("sug-" + i); if (el) el.scrollIntoView({ block: "nearest" }); }
+    }
+
+    function escolher(r) {
+      campo.value = rotulo(r);
+      fecharLista();
+      mostrarResultado(r);
+    }
+
+    function linha(t, v) { return v ? "<dt>" + esc(t) + "</dt><dd>" + v + "</dd>" : ""; }
+    const ehLink = t => /^https?:\/\//i.test(String(t || "").trim());
+
+    function mostrarResultado(r) {
+      const pr = r.prazo, au = r.audiencia && r.audiencia.data && r.audiencia.data >= hoje() ? r.audiencia : null;
+      const icoPrazo = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+      const icoAud = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+      const blocoPrazo = pr
+        ? '<div class="res-bloco sim"><h4>' + icoPrazo + 'Prazo</h4><p class="res-sit">Há prazo em aberto</p><dl class="res-dl">' +
+          linha("Data", esc(dataBR(pr.data)) + ' <span style="color:#64748b;font-weight:400">(' + esc(dia(pr.data)) + ')</span>') +
+          linha("Providência", esc(pr.descricao)) + "</dl></div>"
+        : '<div class="res-bloco"><h4>' + icoPrazo + 'Prazo</h4><p class="res-sit">Nenhum prazo em aberto.</p></div>';
+      const local = au && au.local ? (ehLink(au.local) ? '<a href="' + esc(au.local.trim()) + '" target="_blank" rel="noopener noreferrer">Abrir link da sala virtual</a>' : esc(au.local)) : "";
+      const blocoAud = au
+        ? '<div class="res-bloco sim"><h4>' + icoAud + 'Audiência</h4><p class="res-sit">Audiência agendada</p><dl class="res-dl">' +
+          linha("Data", esc(dataBR(au.data)) + ' <span style="color:#64748b;font-weight:400">(' + esc(dia(au.data)) + ')</span>') +
+          linha("Horário", esc(au.hora)) + linha("Tipo", esc(au.tipo)) + linha("Modalidade", esc(au.modo)) +
+          linha("Comarca", esc(au.comarca)) + linha("Vara / Juízo", esc(au.vara)) + linha("Local", local) + "</dl></div>"
+        : '<div class="res-bloco"><h4>' + icoAud + 'Audiência</h4><p class="res-sit">Nenhuma audiência agendada.</p></div>';
+      saida.innerHTML =
+        '<div class="res-topo"><div><span class="res-rotulo">Processo</span><span class="res-num">' + esc(rotulo(r)) + '</span></div>' +
+        (r.status ? '<span class="res-status">' + esc(r.status) + '</span>' : "") + "</div>" +
+        '<div class="res-grid">' + blocoPrazo + blocoAud + "</div>";
+      saida.classList.add("show");
+      if (window.gtag) gtag("event", "consulta_processual", { encontrado: true });
+    }
+
+    function naoEncontrado(digitos) {
+      saida.innerHTML = '<div class="res-nada"><strong>Processo não encontrado.</strong><br>Confira o número digitado (' + esc(digitos) + '). ' +
+        'Se o processo é acompanhado pelo escritório e não aparece aqui, fale conosco pelo <a href="https://wa.me/5521999226406" target="_blank" rel="noopener noreferrer">WhatsApp</a>.</div>';
+      saida.classList.add("show");
+    }
+
+    campo.addEventListener("focus", () => { carregar().catch(() => {}); });
+    campo.addEventListener("input", async () => {
+      const d = so(campo.value);
+      saida.classList.remove("show");
+      if (d.length < MIN) { fecharLista(); return; }
+      try { await carregar(); } catch (e) { return; }
+      if (so(campo.value) !== d) return;        // a pessoa continuou digitando
+      const exato = dados.find(r => so(r.numero) === d);
+      if (exato && d.length >= 20) { escolher(exato); return; }
+      mostrarLista(d);
+    });
+    campo.addEventListener("keydown", ev => {
+      const n = itens.length;
+      if (ev.key === "ArrowDown" && n) { ev.preventDefault(); marcar((ativo + 1) % n); }
+      else if (ev.key === "ArrowUp" && n) { ev.preventDefault(); marcar((ativo - 1 + n) % n); }
+      else if (ev.key === "Escape") fecharLista();
+      else if (ev.key === "Enter") {
+        ev.preventDefault();
+        if (ativo >= 0 && itens[ativo]) { escolher(itens[ativo]); return; }
+        const d = so(campo.value);
+        if (!dados || d.length < MIN) return;
+        const exato = dados.find(r => so(r.numero) === d);
+        if (exato) escolher(exato);
+        else if (itens.length === 1) escolher(itens[0]);
+        else { fecharLista(); naoEncontrado(campo.value.trim()); }
+      }
+    });
+    lista.addEventListener("mousedown", ev => {
+      const li = ev.target.closest("li[data-i]"); if (!li) return;
+      ev.preventDefault(); escolher(itens[+li.dataset.i]);
+    });
+    document.addEventListener("click", ev => { if (!ev.target.closest(".busca-wrap")) fecharLista(); });
+
+    window.ConsultaProcessual = { abrir: () => { carregar().catch(() => {}); setTimeout(() => campo.focus({ preventScroll: true }), 350); } };
+    if (location.hash === "#consulta") window.ConsultaProcessual.abrir();
+  </script>
   <!-- Aviso de cookies (LGPD) -->
   <div class="cookie-bar" id="cookieBar" role="dialog" aria-label="Aviso de cookies">
     <p>Usamos cookies de estatística (Google Analytics) apenas para contar visitas e melhorar o site. Nenhum dado é vendido ou usado para anúncios.</p>

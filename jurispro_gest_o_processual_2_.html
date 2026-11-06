@@ -965,6 +965,12 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         display: none;
       }
     }
+    /* Permissões de uso: esconde o que a pessoa não pode fazer */
+    body.sem-incluir .so-incluir, body.sem-editar .so-editar { display: none !important; }
+    .aviso-perm { display: none; background: #eef4ff; border: 1px solid #c7d7fe; color: #1e3a8a; border-radius: 6px; padding: 0.6rem 0.9rem; font-size: 0.85rem; margin-bottom: 1rem; }
+    body.sem-incluir .aviso-perm, body.sem-editar .aviso-perm { display: block; }
+    .check-consulta { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.88rem; cursor: pointer; }
+    .check-consulta input { width: 17px; height: 17px; margin-top: 0.15rem; accent-color: #C49A5A; flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -1173,6 +1179,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <!-- ========================================== -->
         <!-- ABA 1: INÍCIO (DASHBOARD)                   -->
         <!-- ========================================== -->
+        <div class="aviso-perm" id="aviso-perm"></div>
         <section id="view-dashboard" class="view-section active">
           <div class="page-header">
             <div>
@@ -1180,7 +1187,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               <p class="page-subtitle">Acompanhamento de processos, prazos e audiências do escritório</p>
             </div>
             <div>
-              <button class="btn-gold" onclick="openProcessModal()">
+              <button class="btn-gold so-incluir" onclick="openProcessModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Novo Processo
               </button>
@@ -1276,7 +1283,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               <p class="page-subtitle">Cadastro, acompanhamento e histórico de ações judiciais e consultivas</p>
             </div>
             <div>
-              <button class="btn-gold" onclick="openProcessModal()">
+              <button class="btn-gold so-incluir" onclick="openProcessModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Novo Processo
               </button>
@@ -1328,7 +1335,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               <p class="page-subtitle">Cronograma de prazos processuais e compromissos organizados por prioridade</p>
             </div>
             <div>
-              <button class="btn-gold" onclick="openProcessModal()">
+              <button class="btn-gold so-incluir" onclick="openProcessModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Novo Prazo / Processo
               </button>
@@ -1456,7 +1463,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               <p class="page-subtitle">Pessoas físicas e jurídicas assistidas pelo escritório Bergamini Advocacia</p>
             </div>
             <div>
-              <button class="btn-gold" onclick="openClientModal()">
+              <button class="btn-gold so-incluir" onclick="openClientModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Novo Cliente
               </button>
@@ -1670,6 +1677,14 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
                 <input type="text" id="proc-aud-local" class="form-control" placeholder="Opcional — vai no e-mail de lembrete">
               </div>
             </div>
+          </div>
+
+          <div class="form-section">
+            <label class="check-consulta" for="proc-consulta">
+              <input type="checkbox" id="proc-consulta" checked>
+              <span><strong>Mostrar na Consulta Processual do site</strong><br>
+              <span style="color:#64748b; font-size:0.8rem;">Quem digitar o número do processo no site vê se há prazo em aberto e audiência agendada (datas, horário, local). Nome do cliente, área e observações nunca aparecem. <b>Desmarque em processos com segredo de justiça</b> (ex.: família).</span></span>
+            </label>
           </div>
 
           <div class="form-group">
@@ -1937,6 +1952,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       ===============================================================
     */
     var CACHE = { processos: [], clientes: [] };
+    // Permissões do usuário logado (definidas no login; padrão = completo)
+    var PERM = { visualizar: true, incluir: true, editar: true };
 
     // Utilitário de data (prazos relativos a hoje)
     function getOffsetDateString(days) {
@@ -1956,17 +1973,24 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     // Grava no servidor só o que mudou (novos, editados e excluídos)
     function syncColecao(nome, lista) {
       const antes = CACHE[nome];
-      CACHE[nome] = lista.slice();
-      refreshAll();
       if (!window.JP) { alert("Sem conexão com o servidor. A alteração não foi salva."); return; }
       const mapaAntes = new Map(antes.map(x => [x.id, JSON.stringify(x)]));
       const ids = new Set(lista.map(x => x.id));
-      lista.forEach(x => {
-        if (mapaAntes.get(x.id) !== JSON.stringify(x)) acompanhar(window.JP.salvar(nome, x));
-      });
-      antes.forEach(x => {
-        if (!ids.has(x.id)) acompanhar(window.JP.excluir(nome, x.id));
-      });
+      const novos = lista.filter(x => !mapaAntes.has(x.id));
+      const alterados = lista.filter(x => mapaAntes.has(x.id) && mapaAntes.get(x.id) !== JSON.stringify(x));
+      const excluidos = antes.filter(x => !ids.has(x.id));
+      // Confere a permissão antes de gravar
+      if (novos.length && !PERM.incluir) { alert("Seu acesso não permite incluir novos registros. Fale com o administrador."); refreshAll(); return; }
+      if ((alterados.length || excluidos.length) && !PERM.editar) { alert("Seu acesso não permite alterar ou excluir registros. Fale com o administrador."); refreshAll(); return; }
+      CACHE[nome] = lista.slice();
+      refreshAll();
+      novos.concat(alterados).forEach(x => acompanhar(window.JP.salvar(nome, x)));
+      excluidos.forEach(x => acompanhar(window.JP.excluir(nome, x.id)));
+      if (nome === "processos" && window.JP.consulta) {
+        const mapaDepois = new Map(lista.map(x => [x.id, x]));
+        antes.forEach(x => { if (!mapaDepois.has(x.id) || mapaAntes.get(x.id) !== JSON.stringify(mapaDepois.get(x.id))) window.JP.consulta.trocar(x, mapaDepois.get(x.id), lista); });
+        novos.forEach(x => window.JP.consulta.trocar(null, x, lista));
+      }
     }
 
     // Indicador "Salvando... / Salvo na nuvem"
@@ -2228,10 +2252,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               <button class="btn-icon" title="Buscar publicações deste processo" onclick="abrirPublicacoes('processo', '${p.id}')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
               </button>
-              <button class="btn-icon" title="Editar Processo" onclick="editProcesso('${p.id}')">
+              <button class="btn-icon so-editar" title="Editar Processo" onclick="editProcesso('${p.id}')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               </button>
-              <button class="btn-icon delete" title="Excluir Processo" onclick="deleteProcesso('${p.id}')">
+              <button class="btn-icon delete so-editar" title="Excluir Processo" onclick="deleteProcesso('${p.id}')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             </div>
@@ -2286,7 +2310,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           <td>${escapeHtml(a.comarca || "—")}${a.vara ? '<div style="font-size:0.75rem; color:#64748b;">' + escapeHtml(a.vara) + "</div>" : ""}</td>
           <td>${escapeHtml(t.proc.cnj)}</td>
           <td>${escapeHtml(t.proc.cliente)}</td>
-          <td style="text-align:right;"><button class="btn-secondary" style="font-size:0.8125rem; padding:0.4rem 0.8rem;" onclick="abrirAudiencia('${t.proc.id}')">Editar</button></td>
+          <td style="text-align:right;"><button class="btn-secondary so-editar" style="font-size:0.8125rem; padding:0.4rem 0.8rem;" onclick="abrirAudiencia('${t.proc.id}')">Editar</button></td>
         </tr>`;
       }).join("");
     }
@@ -2338,8 +2362,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               ${formatarDataBR(t.data)}${t.hora ? " · " + escapeHtml(t.hora) : ""}
             </div>
-            ${ui ? "" : `<button class="btn-secondary" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;" onclick="abrirCumprido('${t.chave}')">${t.cumprido ? "Alterar cumprimento" : "Cumprido?"}</button>`}
-            <button class="btn-secondary" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;" ${editar}>Editar</button>
+            ${ui ? "" : `<button class="btn-secondary so-editar" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;" onclick="abrirCumprido('${t.chave}')">${t.cumprido ? "Alterar cumprimento" : "Cumprido?"}</button>`}
+            <button class="btn-secondary so-editar" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;" ${editar}>Editar</button>
           </div>
           ${caixa}
         </div>`;
@@ -2520,10 +2544,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
                 <button class="btn-icon" title="Buscar publicações deste cliente" onclick="abrirPublicacoes('cliente', '${c.id}')">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                 </button>
-                <button class="btn-icon" title="Editar Cliente" onclick="editCliente('${c.id}')">
+                <button class="btn-icon so-editar" title="Editar Cliente" onclick="editCliente('${c.id}')">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </button>
-                <button class="btn-icon delete" title="Excluir Cliente" onclick="deleteCliente('${c.id}')">
+                <button class="btn-icon delete so-editar" title="Excluir Cliente" onclick="deleteCliente('${c.id}')">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
               </div>
@@ -2564,13 +2588,19 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         $v("proc-aud-local", a.local);
         setYesNo("prazo", temPrazo(proc));
         setYesNo("aud", temAudiencia(proc));
+        document.getElementById("proc-consulta").checked = proc.consultaPublica !== false;
       } else {
         document.getElementById("modal-processo-title").textContent = "Cadastrar Novo Processo";
         document.getElementById("form-processo").reset();
         $v("proc-id", "");
         setYesNo("prazo", false);
         setYesNo("aud", false);
+        document.getElementById("proc-consulta").checked = true;
       }
+      // Quem só pode visualizar abre o processo em modo leitura
+      const soLer = proc ? !PERM.editar : !PERM.incluir;
+      document.querySelector("#form-processo button[type=submit]").style.display = soLer ? "none" : "";
+      if (proc && soLer) document.getElementById("modal-processo-title").textContent = "Dados do Processo";
       document.getElementById("modal-processo").classList.add("open");
     }
 
@@ -2594,6 +2624,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         id: id || ("proc-" + Date.now()),
         cnj: g("proc-cnj"), cliente: g("proc-cliente"), area: g("proc-area"),
         status: g("proc-status"), obs: g("proc-obs"),
+        consultaPublica: document.getElementById("proc-consulta").checked,
         temPrazo: YESNO.prazo,
         prazo: YESNO.prazo ? g("proc-prazo") : "",
         prazoDesc: YESNO.prazo ? g("proc-prazo-desc") : "",
@@ -2651,6 +2682,9 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         document.getElementById("form-cliente").reset();
         $v("cli-id", "");
       }
+      const soLerCli = cli ? !PERM.editar : !PERM.incluir;
+      document.querySelector("#form-cliente button[type=submit]").style.display = soLerCli ? "none" : "";
+      if (cli && soLerCli) document.getElementById("modal-cliente-title").textContent = "Dados do Cliente";
       document.getElementById("modal-cliente").classList.add("open");
     }
 
@@ -2981,9 +3015,9 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     import {
       CONFIG_OK, auth, db, ADMIN_EMAIL, ADMIN_USUARIO, ZAP_ADMIN, SITE, $, msg, traduz,
       normUsuario, usuarioValido, soDigitos, linkZap, ehAdmin, ehAdminEmail, emailDoLogin,
-      lerPerfil, garantirPerfilAdmin, avisarEmail, reservarAba, enviarAba,
+      lerPerfil, garantirPerfilAdmin, reservarAba, enviarAba, permissoesDe,
       onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut,
-      sendPasswordResetEmail, sendEmailVerification, doc, getDoc, setDoc, deleteDoc,
+      sendPasswordResetEmail, sendEmailVerification, doc, getDoc, getDocs, setDoc, deleteDoc,
       collection, onSnapshot, query, where, serverTimestamp
     } from "./jp-firebase.js";
 
@@ -3003,12 +3037,77 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       let assinaturas = [];
       const ordem = (a, b) => (parseInt(String(b.id).replace(/\D/g, "")) || 0) - (parseInt(String(a.id).replace(/\D/g, "")) || 0);
 
+      // ---------- Consulta Processual pública (coleção "consulta") ----------
+      // Só vão para lá: número do processo, status, prazo em aberto e audiência agendada.
+      // Nada de cliente, área, observações, honorários ou dados bancários.
+      const hojeStr = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+      function fichaConsulta(p) {
+        if (!p || p.consultaPublica === false) return null;
+        const id = String(p.cnj || "").replace(/\D/g, "");
+        if (id.length < 7) return null;
+        const comPrazo = (p.temPrazo !== undefined ? !!p.temPrazo && !!p.prazo : !!p.prazo) && !p.prazoCumprido;
+        const a = p.audiencia || {};
+        const comAud = !!p.temAudiencia && !!a.data && !a.cumprido;
+        return {
+          id: id,
+          dados: {
+            cnj: String(p.cnj || "").trim(), numero: id, status: p.status || "",
+            prazo: comPrazo ? { data: p.prazo, descricao: p.prazoDesc || "" } : null,
+            audiencia: comAud ? { data: a.data, hora: a.hora || "", tipo: a.tipo || "", modo: a.modo || "",
+              comarca: a.comarca || "", vara: a.vara || "", local: a.local || "" } : null
+          }
+        };
+      }
+      const gravarConsulta = f => setDoc(doc(db, "consulta", f.id), Object.assign({}, f.dados, { atualizadoEm: hojeStr() }));
+      const apagarConsulta = id => deleteDoc(doc(db, "consulta", id));
+      const outroUsaNumero = (id, lista, menosId) => lista.some(p => p.id !== menosId && (fichaConsulta(p) || {}).id === id);
+
       window.JP = {
         salvar: (col, x) => setDoc(doc(db, col, x.id), JSON.parse(JSON.stringify(x))),
-        excluir: (col, id) => deleteDoc(doc(db, col, id))
+        excluir: (col, id) => deleteDoc(doc(db, col, id)),
+        consulta: {
+          // Chamado a cada processo incluído/alterado/excluído
+          trocar(antigo, novo, lista) {
+            const fa = fichaConsulta(antigo), fn = fichaConsulta(novo);
+            const falha = e => console.warn("Consulta pública não atualizada:", e);
+            if (fa && (!fn || fa.id !== fn.id) && !outroUsaNumero(fa.id, lista, antigo.id)) apagarConsulta(fa.id).catch(falha);
+            if (fn) gravarConsulta(fn).catch(falha);
+          }
+        }
       };
 
+      // Na entrada de quem pode editar: confere se a consulta pública bate com os processos
+      let consultaConferida = false;
+      async function conferirConsulta() {
+        if (consultaConferida || !(PERM.editar || PERM.incluir)) return;
+        consultaConferida = true;
+        try {
+          const atual = new Map();
+          (await getDocs(collection(db, "consulta"))).forEach(d => atual.set(d.id, d.data()));
+          const esperado = new Map();
+          CACHE.processos.forEach(p => { const f = fichaConsulta(p); if (f) esperado.set(f.id, f); });
+          const semData = o => { const c = Object.assign({}, o); delete c.atualizadoEm; return JSON.stringify(c, Object.keys(c).sort()); };
+          for (const [id, f] of esperado) {
+            const ja = atual.get(id);
+            if (!ja || semData(ja) !== semData(f.dados)) await gravarConsulta(f);
+          }
+          if (PERM.editar) for (const id of atual.keys()) if (!esperado.has(id)) await apagarConsulta(id);
+        } catch (e) { console.warn("Conferência da consulta pública:", e); consultaConferida = false; }
+      }
+
       function mostrarApp(user, perfil, admin) {
+        // Veio do link do e-mail de aprovação? Volta para a Administração
+        if (admin) {
+          let volta = null;
+          try { volta = sessionStorage.getItem("jp_voltar_admin"); sessionStorage.removeItem("jp_voltar_admin"); } catch (e) {}
+          if (volta && /\/admin\.html/.test(volta)) { location.href = volta; return; }
+        }
+        PERM = permissoesDe(user, perfil);
+        document.body.classList.toggle("sem-incluir", !PERM.incluir);
+        document.body.classList.toggle("sem-editar", !PERM.editar);
+        const av = document.getElementById("aviso-perm");
+        if (av) av.textContent = "Seu acesso: " + ["Visualizar", PERM.incluir && "Incluir", PERM.editar && "Editar"].filter(Boolean).join(" · ") +
+          ". Para mudar, fale com o administrador.";
         const nome = (perfil && perfil.nome) || user.email;
         $("header-user-name").textContent = nome;
         $("avatar-initial").textContent = (nome || "?").trim().charAt(0).toUpperCase();
@@ -3019,6 +3118,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         const erro = e => { console.error(e); alert("Erro ao carregar dados: " + traduz(e)); };
         assinaturas.push(onSnapshot(collection(db, "processos"), s => {
           CACHE.processos = s.docs.map(d => d.data()).sort(ordem); refreshAll();
+          conferirConsulta();
         }, erro));
         assinaturas.push(onSnapshot(collection(db, "clientes"), s => {
           CACHE.clientes = s.docs.map(d => d.data()).sort(ordem); refreshAll();
@@ -3035,7 +3135,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       onAuthStateChanged(auth, async user => {
         if (cadastrando) return;
         assinaturas.forEach(f => f()); assinaturas = [];
-        if (!user) { mostrarLogin(); return; }
+        if (!user) { consultaConferida = false; mostrarLogin(); return; }
         try {
           if (ehAdminEmail(user)) { await user.reload(); await user.getIdToken(true); }
           if (ehAdminEmail(user) && !user.emailVerified) {
@@ -3141,12 +3241,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           await setDoc(doc(db, "usernames", usuario), { uid: cred.user.uid, email });
           await signOut(auth);
 
-          const painel = SITE + "/admin.html";
-          avisarEmail({
-            _subject: "Novo pedido de acesso – JurisPro Bergamini",
-            Nome: nome, Usuario: usuario, Email: email, WhatsApp: whatsapp, Motivo: motivo,
-            Aprovar: painel
-          });
+          // O e-mail de aviso ao escritório sai pela automação do Google (a cada 5 min)
+          const painel = SITE + "/admin.html?aprovar=" + cred.user.uid;
           let extra = "";
           if (ZAP_ADMIN) {
             const texto = "*Novo pedido de acesso — JurisPro Bergamini*\n" +

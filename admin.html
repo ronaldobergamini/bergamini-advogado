@@ -88,6 +88,16 @@
     .modal-corpo { padding: 1.25rem; }
     .modal-rodape { padding: 0.9rem 1.25rem; background: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.5rem; }
 
+    .perms { display: flex; flex-direction: column; gap: 0.55rem; margin: 0.35rem 0 0.25rem; }
+    .perm { display: flex; gap: 0.65rem; align-items: flex-start; padding: 0.7rem 0.85rem; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 0.9rem; color: var(--text-main); margin: 0; }
+    .perm:hover { border-color: var(--gold); }
+    .perm input { width: 18px; height: 18px; margin-top: 0.1rem; accent-color: var(--gold); flex-shrink: 0; }
+    .perm b { display: block; color: var(--navy); font-size: 0.92rem; }
+    .perm span.mini { display: block; }
+    .perm.travado { background: #f8fafc; cursor: default; }
+    .ficha { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem 0.9rem; font-size: 0.875rem; margin-bottom: 1rem; line-height: 1.6; }
+    .ficha b { color: var(--navy); }
+
     @media (max-width: 700px) {
       .grade { grid-template-columns: 1fr; }
       .titulo { font-size: 1.6rem; }
@@ -153,7 +163,7 @@
         </div>
         <div class="tabela-wrap">
           <table>
-            <thead><tr><th>Nome / usuário</th><th>Contato</th><th>Perfil</th><th>Status</th><th>Cadastro</th><th></th></tr></thead>
+            <thead><tr><th>Nome / usuário</th><th>Contato</th><th>Permissões</th><th>Status</th><th>Cadastro</th><th></th></tr></thead>
             <tbody id="tb-usuarios"><tr><td colspan="6" class="vazio">Carregando...</td></tr></tbody>
           </table>
         </div>
@@ -221,6 +231,14 @@
               <select id="m-status"><option value="ativo">Ativo</option><option value="pendente">Pendente</option><option value="bloqueado">Bloqueado</option><option value="recusado">Recusado</option></select>
             </div>
           </div>
+          <div class="campo" id="m-perms-campo">
+            <label>Permissões na Área Interna</label>
+            <div class="perms">
+              <label class="perm" id="m-lbl-v"><input type="checkbox" id="m-perm-v"><span><b>Visualizar</b><span class="mini">Consulta processos, prazos, audiências e clientes.</span></span></label>
+              <label class="perm"><input type="checkbox" id="m-perm-i"><span><b>Incluir</b><span class="mini">Cadastra novos processos e clientes.</span></span></label>
+              <label class="perm"><input type="checkbox" id="m-perm-e"><span><b>Editar</b><span class="mini">Altera e exclui registros, marca prazos e audiências como cumpridos.</span></span></label>
+            </div>
+          </div>
           <p class="mini" id="m-dica"></p>
         </div>
         <div class="modal-rodape">
@@ -231,11 +249,35 @@
     </div>
   </div>
 
+  <!-- MODAL: APROVAR PEDIDO -->
+  <div class="modal-fundo" id="modal-aprovar">
+    <div class="modal">
+      <div class="modal-topo"><h3>Aprovar acesso</h3><button class="fechar" id="ap-fechar" aria-label="Fechar">&times;</button></div>
+      <div class="modal-corpo">
+        <div id="msg-aprovar" class="msg" data-base="msg" style="display:none;"></div>
+        <div class="ficha" id="ap-ficha"></div>
+        <label>O que esta pessoa pode fazer?</label>
+        <div class="perms">
+          <label class="perm" id="ap-lbl-v"><input type="checkbox" id="ap-perm-v"><span><b>Visualizar</b><span class="mini">Consulta processos, prazos, audiências e clientes.</span></span></label>
+          <label class="perm"><input type="checkbox" id="ap-perm-i"><span><b>Incluir</b><span class="mini">Cadastra novos processos e clientes.</span></span></label>
+          <label class="perm"><input type="checkbox" id="ap-perm-e"><span><b>Editar</b><span class="mini">Altera e exclui registros, marca prazos e audiências como cumpridos.</span></span></label>
+        </div>
+        <p class="mini" style="margin-top:0.6rem;">Incluir e Editar já incluem Visualizar. Marque uma, duas ou as três.</p>
+      </div>
+      <div class="modal-rodape">
+        <button type="button" class="btn btn-perigo" id="ap-recusar" style="margin-right:auto;">Recusar pedido</button>
+        <button type="button" class="btn btn-claro" id="ap-cancelar">Cancelar</button>
+        <button type="button" class="btn btn-ouro" id="ap-ok">Aprovar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="firebase-config.js"></script>
   <script type="module">
     import {
       CONFIG, CONFIG_OK, auth, db, ADMIN_EMAIL, SITE, $, esc, msg, traduz, normUsuario, usuarioValido,
       soDigitos, linkZap, fmtData, ehAdmin, ehAdminEmail, lerPerfil, garantirPerfilAdmin,
+      normPerm, permDeCodigo, textoPerm,
       initializeApp, getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut,
       sendPasswordResetEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider,
       doc, getDoc, setDoc, updateDoc, deleteDoc, collection, onSnapshot, serverTimestamp
@@ -252,7 +294,9 @@
       onAuthStateChanged(auth, async user => {
         if (desliga) { desliga(); desliga = null; }
         if (!user) {
-          portao('Entre primeiro na <a href="' + AREA + '">Área Interna</a> com seu usuário de administrador e depois clique em "Administração".');
+          // Guarda o link (ex.: vindo do e-mail de aprovação) para voltar aqui depois do login
+          try { sessionStorage.setItem("jp_voltar_admin", location.href); } catch (e) {}
+          portao('Entre primeiro na <a href="' + AREA + '">Área Interna</a> com seu usuário de administrador. Depois do login você volta automaticamente para esta tela.');
           $("btn-sair").style.display = "none"; $("quem").textContent = "";
           return;
         }
@@ -271,6 +315,7 @@
             usuarios.sort((a, b) => (b.criadoEm && b.criadoEm.seconds || 0) - (a.criadoEm && a.criadoEm.seconds || 0));
             const me = usuarios.find(u => u.uid === eu.uid); if (me) meuPerfil = me;
             desenhar();
+            abrirDoLink();
           }, e => msg("msg-geral", traduz(e), "erro"));
         } catch (e) { portao(esc(traduz(e))); }
       });
@@ -315,7 +360,7 @@
         return "<tr><td><strong>" + esc(u.nome) + "</strong>" + (sou ? " <span class='mini'>(você)</span>" : "") +
           "<div class='mini'>" + esc(u.usuario) + "</div></td>" +
           "<td>" + contato(u) + "</td>" +
-          "<td>" + (u.perfil === "admin" ? selo("admin") : "<span class='mini'>usuário</span>") + "</td>" +
+          "<td>" + (u.perfil === "admin" ? selo("admin") : "<span class='mini'>" + esc(u.status === "pendente" ? "a definir na aprovação" : textoPerm(u)) + "</span>") + "</td>" +
           "<td>" + selo(u.status || "pendente") + "</td>" +
           "<td class='mini'>" + fmtData(u.criadoEm) + "</td>" +
           "<td class='acoes'>" +
@@ -335,15 +380,12 @@
       const u = usuarios.find(x => x.uid === b.dataset.uid); if (!u) return;
       const acao = b.dataset.acao;
       if (acao === "editar") { abrirModal(u); return; }
+      if (acao === "aprovar" || (acao === "ativar" && !u.permissoes && u.perfil !== "admin")) { abrirAprovar(u); return; }
       b.disabled = true;
       try {
-        if (acao === "aprovar" || acao === "ativar") {
+        if (acao === "ativar") {
           await updateDoc(doc(db, "users", u.uid), { status: "ativo", aprovadoEm: serverTimestamp(), aprovadoPor: meuPerfil.usuario || eu.email });
-          const texto = "Olá, " + (u.nome || "").split(" ")[0] + "! Seu acesso à Área Interna do escritório Bergamini Advocacia foi liberado.\n" +
-            "Entre em " + SITE + "/" + AREA + " com o usuário *" + u.usuario + "* e a senha que você cadastrou.";
-          const z = soDigitos(u.whatsapp);
-          msg("msg-geral", "✓ Acesso de <strong>" + esc(u.nome) + "</strong> liberado." +
-            (z ? ' <a href="' + linkZap(z, texto) + '" target="_blank" rel="noopener">Avisar pelo WhatsApp</a>' : ""), "ok", true);
+          msg("msg-geral", "✓ Acesso de <strong>" + esc(u.nome) + "</strong> reativado (" + esc(textoPerm(u)) + ").", "ok", true);
         } else if (acao === "recusar") {
           if (!confirm("Recusar o pedido de " + u.nome + "?")) return;
           await updateDoc(doc(db, "users", u.uid), { status: "recusado", recusadoEm: serverTimestamp(), recusadoPor: meuPerfil.usuario || eu.email });
@@ -379,6 +421,8 @@
       $("m-status").value = u ? (u.status || "pendente") : "ativo";
       const sou = u && u.uid === eu.uid;
       $("m-perfil").disabled = !!sou; $("m-status").disabled = !!sou;
+      lerCaixas("m", u && u.permissoes ? normPerm(u.permissoes) : (u ? { visualizar: true, incluir: true, editar: true } : { visualizar: true }));
+      mostrarPermsModal();
       $("campo-senha").style.display = novo ? "block" : "none";
       $("m-senha").required = novo;
       $("m-senha").value = novo ? Math.random().toString(36).slice(2, 10) : "";
@@ -388,9 +432,96 @@
       $("modal").classList.add("aberto");
     }
     const fecharModal = () => $("modal").classList.remove("aberto");
+    const mostrarPermsModal = () => { $("m-perms-campo").style.display = $("m-perfil").value === "admin" ? "none" : "block"; };
+    $("m-perfil").onchange = mostrarPermsModal;
     $("btn-novo").onclick = () => abrirModal(null);
     $("modal-fechar").onclick = fecharModal;
     $("modal-cancelar").onclick = fecharModal;
+
+    // ---------- Caixas de permissão (prefixo "m" = editar, "ap" = aprovar) ----------
+    function caixas(pre) {
+      return normPerm({ visualizar: $(pre + "-perm-v").checked, incluir: $(pre + "-perm-i").checked, editar: $(pre + "-perm-e").checked });
+    }
+    function lerCaixas(pre, p) {
+      p = normPerm(p);
+      $(pre + "-perm-v").checked = p.visualizar; $(pre + "-perm-i").checked = p.incluir; $(pre + "-perm-e").checked = p.editar;
+      travarVisualizar(pre);
+    }
+    function travarVisualizar(pre) {
+      const obrig = $(pre + "-perm-i").checked || $(pre + "-perm-e").checked;
+      if (obrig) $(pre + "-perm-v").checked = true;
+      $(pre + "-perm-v").disabled = obrig;
+      $(pre + "-lbl-v").classList.toggle("travado", obrig);
+    }
+    ["m", "ap"].forEach(pre => ["i", "e"].forEach(k => $(pre + "-perm-" + k).addEventListener("change", () => travarVisualizar(pre))));
+
+    // ---------- Aprovação ----------
+    let aprovando = null;
+    function abrirAprovar(u, codigo) {
+      aprovando = u;
+      $("ap-ficha").innerHTML =
+        "<b>" + esc(u.nome) + "</b> &nbsp;<span class='mini'>(" + esc(u.usuario) + ")</span><br>" +
+        esc(u.email) + (u.whatsapp ? " · WhatsApp " + esc(u.whatsapp) : "") +
+        (u.motivo ? "<br><span class='mini'>Motivo: " + esc(u.motivo) + "</span>" : "") +
+        "<br><span class='mini'>Pedido em " + fmtData(u.criadoEm) + "</span>";
+      lerCaixas("ap", codigo ? permDeCodigo(codigo) : { visualizar: true });
+      msg("msg-aprovar", "");
+      $("modal-aprovar").classList.add("aberto");
+    }
+    const fecharAprovar = () => { $("modal-aprovar").classList.remove("aberto"); aprovando = null; };
+    $("ap-fechar").onclick = fecharAprovar;
+    $("ap-cancelar").onclick = fecharAprovar;
+
+    $("ap-ok").onclick = async () => {
+      const u = aprovando; if (!u) return;
+      const perm = caixas("ap");
+      if (!perm.visualizar) { msg("msg-aprovar", "Marque pelo menos uma permissão.", "erro"); return; }
+      const b = $("ap-ok"); b.disabled = true;
+      try {
+        await updateDoc(doc(db, "users", u.uid), {
+          status: "ativo", perfil: "usuario", permissoes: perm,
+          aprovadoEm: serverTimestamp(), aprovadoPor: meuPerfil.usuario || eu.email
+        });
+        const desc = textoPerm({ permissoes: perm });
+        const texto = "Olá, " + (u.nome || "").split(" ")[0] + "! Seu acesso à Área Interna do escritório Bergamini Advocacia foi liberado.\n" +
+          "Permissões: " + desc + "\n" +
+          "Entre em " + SITE + "/" + AREA + " com o usuário *" + u.usuario + "* e a senha que você cadastrou.";
+        const z = soDigitos(u.whatsapp);
+        fecharAprovar();
+        msg("msg-geral", "✓ Acesso de <strong>" + esc(u.nome) + "</strong> liberado (" + esc(desc) + ")." +
+          (z ? ' <a href="' + linkZap(z, texto) + '" target="_blank" rel="noopener">Avisar pelo WhatsApp</a>' : ""), "ok", true);
+        limparLink();
+      } catch (e) { msg("msg-aprovar", traduz(e), "erro"); }
+      finally { b.disabled = false; }
+    };
+
+    $("ap-recusar").onclick = async () => {
+      const u = aprovando; if (!u) return;
+      if (!confirm("Recusar o pedido de " + u.nome + "?")) return;
+      try {
+        await updateDoc(doc(db, "users", u.uid), { status: "recusado", recusadoEm: serverTimestamp(), recusadoPor: meuPerfil.usuario || eu.email });
+        fecharAprovar();
+        msg("msg-geral", "Pedido de " + u.nome + " recusado.", "info");
+        limparLink();
+      } catch (e) { msg("msg-aprovar", traduz(e), "erro"); }
+    };
+
+    // Link do e-mail: admin.html?aprovar=UID&p=vie
+    let linkTratado = false;
+    function abrirDoLink() {
+      if (linkTratado) return;
+      const q = new URLSearchParams(location.search), uid = q.get("aprovar");
+      if (!uid) { linkTratado = true; return; }
+      linkTratado = true;
+      const u = usuarios.find(x => x.uid === uid);
+      if (!u) { msg("msg-geral", "Esse pedido de acesso não foi encontrado (talvez tenha sido excluído).", "info"); limparLink(); return; }
+      if (u.status !== "pendente") {
+        msg("msg-geral", "O pedido de <strong>" + esc(u.nome) + "</strong> já foi tratado: status <strong>" + esc(u.status) + "</strong> (" + esc(textoPerm(u)) + "). Para mudar as permissões, use Editar na aba Usuários.", "info", true);
+        limparLink(); return;
+      }
+      abrirAprovar(u, q.get("p"));
+    }
+    function limparLink() { try { history.replaceState(null, "", location.pathname); } catch (e) {} }
 
     async function usuarioLivre(u, uid) {
       const s = await getDoc(doc(db, "usernames", u));
@@ -405,13 +536,15 @@
         whatsapp: $("m-whatsapp").value.trim(),
         usuario: normUsuario($("m-usuario").value),
         perfil: $("m-perfil").value,
-        status: $("m-status").value
+        status: $("m-status").value,
+        permissoes: caixas("m")
       };
       try {
         if (!usuarioValido(dados.usuario)) throw { code: "jp/usuario-invalido" };
+        if (dados.perfil !== "admin" && !dados.permissoes.visualizar) throw { message: "Marque pelo menos uma permissão (Visualizar, Incluir ou Editar)." };
         if (editando) {
           const sou = editando.uid === eu.uid;
-          if (sou) { delete dados.perfil; delete dados.status; }
+          if (sou) { delete dados.perfil; delete dados.status; delete dados.permissoes; }
           if (dados.usuario !== normUsuario(editando.usuario)) {
             if (!(await usuarioLivre(dados.usuario, editando.uid))) throw { code: "jp/usuario-existe" };
             await setDoc(doc(db, "usernames", dados.usuario), { uid: editando.uid, email: editando.email });
