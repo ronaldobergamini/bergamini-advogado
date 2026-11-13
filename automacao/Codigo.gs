@@ -2,7 +2,8 @@
    JurisPro — Bergamini Advocacia — AUTOMAÇÕES (Google Apps Script)
    ---------------------------------------------------------------------
    Roda no Google, sozinho, sem ninguém abrir o sistema:
-     • Todo dia ~7h ......... lembrete de audiência 2 dias antes
+     • Todo dia ~7h ......... agenda do dia (audiências e prazos de HOJE),
+                              lembrete de audiência 2 dias antes
                               (advogado + cliente) e busca de novas
                               publicações no Comunica PJe (OAB e processos)
      • Toda sexta ~8h ....... resumo das tarefas de seg a sex da semana
@@ -18,6 +19,8 @@
 const CFG = {
   projetoFirebase: "bergamini-advogado",
   emailAdvogado: "contato.bergaminiadvocacia@gmail.com",
+  // Quem recebe os avisos internos (agenda, lembretes, resumo semanal, falhas).
+  emailsAviso: ["contato.bergaminiadvocacia@gmail.com", "ronaldobergamini.advogado@gmail.com"],
   nomeAdvogado: "Dr. Ronaldo Bergamini",
   telefoneAdvogado: "(21) 99922-6406",
   oab: "182124",
@@ -60,7 +63,35 @@ function ativarAvisoCadastro() {
 /** Manda para o advogado um e-mail de teste com o resumo da próxima semana. */
 function testarEnvio() {
   resumoSemanal(true);
-  Logger.log("E-mail de teste enviado para " + CFG.emailAdvogado);
+  Logger.log("E-mail de teste enviado para " + destinoInterno());
+}
+
+/** DIAGNÓSTICO: rode quando um aviso não chegar. Mostra no registro (e manda por
+    e-mail) se os agendamentos estão ligados, se o banco é lido e, para cada
+    audiência dos próximos 14 dias, se o lembrete já foi enviado. */
+function diagnostico() {
+  const linhas = [];
+  const log = t => { linhas.push(t); Logger.log(t); };
+  const gatilhos = ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction());
+  ["rotinaDiaria", "resumoSemanal", "rotinaBackup", "avisarCadastros"].forEach(f =>
+    log((gatilhos.indexOf(f) >= 0 ? "OK  " : "FALTA ") + "agendamento " + f +
+        (gatilhos.indexOf(f) >= 0 ? "" : "  -> rode a função instalar")));
+  log("Avisos internos vão para: " + destinoInterno());
+  log("Cota de e-mails restante hoje: " + MailApp.getRemainingDailyQuota());
+  let processos = [];
+  try { processos = lerColecao("processos"); log("OK  banco lido: " + processos.length + " processo(s)"); }
+  catch (e) { log("ERRO ao ler o banco: " + e.message + "  -> o script precisa rodar na conta Google dona do projeto Firebase"); }
+  const hoje = hojeISO(), fim = maisDias(hoje, 14);
+  const prox = processos.filter(p => p.temAudiencia && p.audiencia && p.audiencia.data >= hoje && p.audiencia.data <= fim);
+  log(prox.length + " audiência(s) entre " + dataBR(hoje) + " e " + dataBR(fim) + ":");
+  prox.forEach(p => {
+    const a = p.audiencia, av = p.avisos || {}, chave = a.data + "|" + (a.hora || "");
+    log(" - " + dataBR(a.data) + " " + (a.hora || "--") + " · " + (p.cnj || "") + " · " + (p.cliente || "") +
+        (a.cumprido ? " · marcada como CUMPRIDA (não gera lembrete)" : "") +
+        " · lembrete 2 dias antes: " + (av.adv === chave ? "enviado" : "ainda não"));
+  });
+  enviar(destinoInterno(), "JurisPro — diagnóstico dos avisos por e-mail",
+    moldura("Diagnóstico dos avisos", "<pre style='font-size:12px;white-space:pre-wrap'>" + esc(linhas.join("\n")) + "</pre>"));
 }
 
 /* ============================ ROTINAS ============================ */
@@ -70,6 +101,7 @@ function rotinaBackup() {
 }
 
 function rotinaDiaria() {
+  try { agendaDoDia(); } catch (e) { avisarErro("agenda do dia", e); }
   try { lembretesAudiencia(); } catch (e) { avisarErro("lembretes de audiência", e); }
   try { verificarPublicacoes(); } catch (e) { avisarErro("busca de publicações", e); }
 }
@@ -89,7 +121,7 @@ function lembretesAudiencia() {
     const novos = Object.assign({}, avisos);
 
     if (avisos.adv !== chave) {
-      enviar(CFG.emailAdvogado,
+      enviar(destinoInterno(),
         "Audiência em " + dataBR(a.data) + " às " + (a.hora || "--") + " — " + (p.cliente || ""),
         emailAudienciaAdvogado(p, a, cli));
       novos.adv = chave;
@@ -102,6 +134,40 @@ function lembretesAudiencia() {
     }
     if (JSON.stringify(novos) !== JSON.stringify(avisos)) gravarCampo("processos", p.id, "avisos", novos);
   });
+}
+
+/** Todo dia de manhã: audiências e prazos de HOJE (uma vez por dia, só se houver algo). */
+function agendaDoDia() {
+  const hoje = hojeISO();
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty("agendaDia") === hoje) return;
+  const clientes = lerColecao("clientes");
+  const itens = [];
+  lerColecao("processos").forEach(p => {
+    const temPrazo = p.temPrazo !== undefined ? (p.temPrazo && p.prazo) : p.prazo;
+    if (temPrazo && !p.prazoCumprido && p.prazo === hoje)
+      itens.push({ tipo: "Prazo", hora: "", p: p, desc: p.prazoDesc || p.obs || "" });
+    const a = p.audiencia || {};
+    if (p.temAudiencia && a.data === hoje && !a.cumprido)
+      itens.push({ tipo: "Audiência", hora: a.hora || "", p: p,
+        desc: [a.tipo, a.modo, a.comarca, a.vara, a.local].filter(Boolean).join(" · ") });
+  });
+  props.setProperty("agendaDia", hoje);
+  if (!itens.length) return;
+  itens.sort((x, y) => (x.hora || "99").localeCompare(y.hora || "99"));
+  const cab = "<tr>" + ["Horário", "Tipo", "Processo", "Cliente"].map(th).join("") + "</tr>";
+  const linhas = itens.map(t => {
+    const c = clientes.find(k => k.nome === t.p.cliente) || {};
+    return "<tr>" + td(esc(t.hora || "—")) +
+      td("<span style='font-weight:600;color:" + (t.tipo === "Prazo" ? "#92400e" : "#3730a3") + "'>" + t.tipo + "</span>") +
+      td(esc(t.p.cnj || "") + (t.desc ? "<br><span style='color:#64748b'>" + esc(t.desc) + "</span>" : "")) +
+      td(esc(t.p.cliente || "") + (c.telefone ? "<br><span style='color:#64748b'>" + esc(c.telefone) + "</span>" : "")) + "</tr>";
+  }).join("");
+  const nAud = itens.filter(t => t.tipo === "Audiência").length, nPrazo = itens.length - nAud;
+  enviar(destinoInterno(),
+    "Hoje, " + dataBR(hoje) + ": " + [nAud && nAud + " audiência(s)", nPrazo && nPrazo + " prazo(s)"].filter(Boolean).join(" e "),
+    moldura("Agenda de hoje — " + dataBR(hoje) + " (" + diaSemana(hoje) + ")", tabela(cab + linhas) +
+      "<p style='margin-top:18px'><a href='" + CFG.site + "/jurispro_gest_o_processual_2_.html'>Abrir o JurisPro</a></p>"));
 }
 
 /** Sexta-feira: tarefas de segunda a sexta da semana seguinte. */
@@ -150,7 +216,7 @@ function resumoSemanal(teste) {
       tabela(cab + vencidos.map(linha).join(""));
   }
   corpo += "<p style='margin-top:18px'>Abra a Área Interna para marcar o cumprimento: <a href='" + CFG.site + "/jurispro_gest_o_processual_2_.html'>JurisPro</a></p>";
-  enviar(CFG.emailAdvogado,
+  enviar(destinoInterno(),
     (teste ? "[TESTE] " : "") + "Agenda da semana " + dataBR(seg) + " a " + dataBR(sex) + " — " + tarefas.length + " tarefa(s)",
     moldura("Agenda da próxima semana", corpo));
 }
@@ -230,7 +296,7 @@ function verificarPublicacoes() {
 
   consultar({ numeroOab: CFG.oab, ufOab: CFG.ufOab });
   lerColecao("processos")
-    .filter(p => p.status === "Ativo" && p.cnj)
+    .filter(p => p.status === "Ativo" && p.cnj && !(p.arquivado !== undefined ? p.arquivado === true : p.status === "Arquivado"))
     .forEach(p => { consultar({ numeroProcesso: String(p.cnj).replace(/\D/g, "") }); Utilities.sleep(400); });
 
   const ids = Object.keys(achadas);
@@ -248,7 +314,7 @@ function verificarPublicacoes() {
         "</div>";
     }).join("") +
     "<p style='color:#64748b;font-size:12px'>Fonte: comunica.pje.jus.br. Confira sempre no sistema do tribunal antes de contar prazos.</p>";
-  enviar(CFG.emailAdvogado, "Novas publicações — " + itens.length + " encontrada(s)", moldura("Novas publicações", corpo));
+  enviar(destinoInterno(), "Novas publicações — " + itens.length + " encontrada(s)", moldura("Novas publicações", corpo));
 
   ids.forEach(id => vistas[id] = hojeISO());
   const corte = maisDias(hojeISO(), -60);              // esquece as muito antigas
@@ -406,6 +472,10 @@ function tabela(html) { return "<table style='border-collapse:collapse;width:100
 function th(t) { return "<th style='text-align:left;padding:7px 8px;background:#061529;color:#fff;font-weight:600'>" + t + "</th>"; }
 function td(t) { return "<td style='padding:7px 8px;border-bottom:1px solid #e2e6ea;vertical-align:top'>" + t + "</td>"; }
 
+function destinoInterno() {
+  return (CFG.emailsAviso && CFG.emailsAviso.length ? CFG.emailsAviso : [CFG.emailAdvogado]).join(",");
+}
+
 function enviar(para, assunto, html, responderPara) {
   MailApp.sendEmail({
     to: para, subject: assunto, htmlBody: html,
@@ -416,7 +486,7 @@ function enviar(para, assunto, html, responderPara) {
 function avisarErro(onde, e) {
   console.error(onde, e);
   try {
-    MailApp.sendEmail(CFG.emailAdvogado, "JurisPro — falha na automação (" + onde + ")",
+    MailApp.sendEmail(destinoInterno(), "JurisPro — falha na automação (" + onde + ")",
       "A rotina automática falhou: " + (e && e.message ? e.message : e) +
       "\n\nSe repetir, abra script.google.com > JurisPro > Execuções para ver o detalhe.");
   } catch (x) {}

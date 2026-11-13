@@ -1303,6 +1303,11 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
                 <option value="Arquivado">Arquivado</option>
                 <option value="Concluído">Concluído</option>
               </select>
+              <select id="filter-arquivo" class="form-control" style="width: auto; min-width: 150px;" onchange="renderProcessosTable()" title="Mostrar processos ativos, arquivados ou todos">
+                <option value="">Todos</option>
+                <option value="ativos">Ativos</option>
+                <option value="arquivados">Arquivados</option>
+              </select>
             </div>
 
             <div class="table-container">
@@ -1313,6 +1318,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
                     <th>Cliente</th>
                     <th>Área</th>
                     <th>Status</th>
+                    <th>Situação</th>
                     <th>Prazo / Audiência</th>
                     <th style="text-align: right;">Ações</th>
                   </tr>
@@ -1603,6 +1609,18 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
                 <option value="Concluído">Concluído</option>
               </select>
             </div>
+          </div>
+
+          <!-- Processo arquivado? -->
+          <div class="form-section">
+            <div class="yesno-row">
+              <span class="q">Processo arquivado?</span>
+              <div class="yesno" id="yn-arq">
+                <button type="button" data-v="sim" onclick="setYesNo('arq', true)">Sim</button>
+                <button type="button" data-v="nao" onclick="setYesNo('arq', false)">Não</button>
+              </div>
+            </div>
+            <div style="color:#64748b; font-size:0.8rem; margin-top:-0.4rem;">Processos arquivados não entram na contagem de "Processos Ativos".</div>
           </div>
 
           <!-- Há prazo? -->
@@ -2131,6 +2149,14 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     // ---------- Normalização de registros antigos ----------
     function temPrazo(p) { return p.temPrazo !== undefined ? !!p.temPrazo && !!p.prazo : !!p.prazo; }
     function temAudiencia(p) { return !!p.temAudiencia && !!(p.audiencia && p.audiencia.data); }
+    // Arquivado: campo próprio (Sim/Não). Processos antigos, sem o campo, contam como
+    // arquivados quando o Status era "Arquivado".
+    function ehArquivado(p) { return p.arquivado !== undefined ? p.arquivado === true : p.status === "Arquivado"; }
+    function badgeArquivo(p) {
+      return ehArquivado(p)
+        ? '<span class="badge-status badge-arquivado">Arquivado</span>'
+        : '<span class="badge-status badge-ativo">Ativo</span>';
+    }
 
     // Lista única de tarefas (prazos + audiências) a partir dos processos
     function listarTarefas() {
@@ -2164,7 +2190,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       const processos = getStoredProcessos();
       const tarefas = listarTarefas();
       const hoje = hojeISO(), umAno = isoMaisDias(hoje, -365);
-      document.getElementById("kpi-processos-ativos").textContent = processos.filter(p => p.status === "Ativo").length;
+      document.getElementById("kpi-processos-ativos").textContent = processos.filter(p => p.status === "Ativo" && !ehArquivado(p)).length;
       document.getElementById("kpi-prazos-semana").textContent =
         tarefas.filter(t => t.tipo === "prazo" && !t.cumprido && getDeadlineStatus(t.data) === "semana").length;
       document.getElementById("kpi-audiencias").textContent =
@@ -2225,15 +2251,18 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     function renderProcessosTable() {
       const search = (document.getElementById("search-processos").value || "").toLowerCase();
       const statusFilter = document.getElementById("filter-status").value;
+      const arquivoFilter = document.getElementById("filter-arquivo").value;
       const tbody = document.getElementById("table-processos-body");
       const filtered = getStoredProcessos().filter(p => {
         const matchSearch = String(p.cnj || "").toLowerCase().includes(search) ||
                             String(p.cliente || "").toLowerCase().includes(search) ||
                             String(p.area || "").toLowerCase().includes(search);
-        return matchSearch && (statusFilter === "" || p.status === statusFilter);
+        const matchArquivo = arquivoFilter === "" ||
+                             (arquivoFilter === "arquivados" ? ehArquivado(p) : !ehArquivado(p));
+        return matchSearch && matchArquivo && (statusFilter === "" || p.status === statusFilter);
       });
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #888; padding: 1.5rem;">Nenhum processo encontrado para os critérios pesquisados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888; padding: 1.5rem;">Nenhum processo encontrado para os critérios pesquisados.</td></tr>`;
         return;
       }
       tbody.innerHTML = filtered.map(p => {
@@ -2246,6 +2275,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           <td>${escapeHtml(p.cliente)}</td>
           <td>${escapeHtml(p.area)}</td>
           <td><span class="badge-status ${getBadgeClass(p.status)}">${escapeHtml(p.status)}</span></td>
+          <td>${badgeArquivo(p)}</td>
           <td style="font-size:0.84rem;">${linhas.join("") || '<span style="color:#94a3b8;">—</span>'}</td>
           <td style="text-align: right;">
             <div class="table-actions" style="justify-content: flex-end;">
@@ -2527,7 +2557,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         return;
       }
       tbody.innerHTML = filtered.map(c => {
-        const procCount = processos.filter(p => p.cliente === c.nome && p.status === "Ativo").length;
+        const procCount = processos.filter(p => p.cliente === c.nome && p.status === "Ativo" && !ehArquivado(p)).length;
         const h = c.honorarios || {};
         const corPago = h.pago === "Sim" ? "badge-ativo" : (h.pago === "Parcialmente" ? "badge-suspenso" : "badge-arquivado");
         const honor = (h.valor || h.forma || h.pago)
@@ -2566,12 +2596,13 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     }
 
     // Botões Sim / Não do cadastro de processo
-    const YESNO = { prazo: false, aud: false };
+    const YESNO = { prazo: false, aud: false, arq: false };
     function setYesNo(chave, sim) {
       YESNO[chave] = sim;
       document.querySelectorAll("#yn-" + chave + " button").forEach(b =>
         b.classList.toggle("on", (b.dataset.v === "sim") === sim));
-      document.getElementById("rev-" + chave).classList.toggle("show", sim);
+      const rev = document.getElementById("rev-" + chave);
+      if (rev) rev.classList.toggle("show", sim);
     }
 
     function openProcessModal(proc = null) {
@@ -2588,6 +2619,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         $v("proc-aud-local", a.local);
         setYesNo("prazo", temPrazo(proc));
         setYesNo("aud", temAudiencia(proc));
+        setYesNo("arq", ehArquivado(proc));
         document.getElementById("proc-consulta").checked = proc.consultaPublica !== false;
       } else {
         document.getElementById("modal-processo-title").textContent = "Cadastrar Novo Processo";
@@ -2595,6 +2627,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         $v("proc-id", "");
         setYesNo("prazo", false);
         setYesNo("aud", false);
+        setYesNo("arq", false);
         document.getElementById("proc-consulta").checked = true;
       }
       // Quem só pode visualizar abre o processo em modo leitura
@@ -2624,6 +2657,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         id: id || ("proc-" + Date.now()),
         cnj: g("proc-cnj"), cliente: g("proc-cliente"), area: g("proc-area"),
         status: g("proc-status"), obs: g("proc-obs"),
+        arquivado: YESNO.arq,
         consultaPublica: document.getElementById("proc-consulta").checked,
         temPrazo: YESNO.prazo,
         prazo: YESNO.prazo ? g("proc-prazo") : "",
@@ -2924,6 +2958,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         const a = p.audiencia || {};
         return {
           "Nº CNJ": p.cnj, "Cliente": p.cliente, "Área": p.area, "Status": p.status,
+          "Arquivado?": ehArquivado(p) ? "Sim" : "Não",
           "Há prazo?": temPrazo(p) ? "Sim" : "Não", "Data do prazo": temPrazo(p) ? formatarDataBR(p.prazo) : "",
           "O que fazer": p.prazoDesc || "", "Prazo cumprido?": temPrazo(p) ? (p.prazoCumprido ? "Sim" : "Não") : "",
           "Há audiência?": temAudiencia(p) ? "Sim" : "Não",
@@ -2974,6 +3009,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     function abrirProcessosAtivos() {
       document.getElementById("search-processos").value = "";
       document.getElementById("filter-status").value = "Ativo";
+      document.getElementById("filter-arquivo").value = "ativos";
       renderProcessosTable();
       switchNav("processos");
     }
