@@ -845,6 +845,14 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       gap: 0.75rem;
     }
 
+    .modal-footer { flex-wrap: wrap; }
+    .btn-email {
+      background: var(--navy); color: #ffffff; border: 1px solid var(--navy);
+      padding: 0.625rem 1.1rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem;
+    }
+    .btn-email:hover { opacity: 0.9; }
+
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1713,6 +1721,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
         <div class="modal-footer">
           <button type="button" class="btn-secondary" onclick="closeProcessModal()">Cancelar</button>
+          <button type="button" id="btn-enviar-atualizacao" class="btn-email" onclick="enviarAtualizacaoCliente()" title="Abre o Gmail de contato.bergaminiadvocacia@gmail.com com a mensagem pronta para o cliente">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            Enviar atualização ao cliente
+          </button>
           <button type="submit" class="btn-gold">Salvar Processo</button>
         </div>
       </form>
@@ -2633,6 +2645,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       // Quem só pode visualizar abre o processo em modo leitura
       const soLer = proc ? !PERM.editar : !PERM.incluir;
       document.querySelector("#form-processo button[type=submit]").style.display = soLer ? "none" : "";
+      // Enviar atualização: só ao editar um processo já salvo, por quem pode editar
+      document.getElementById("btn-enviar-atualizacao").style.display = (proc && !soLer) ? "" : "none";
       if (proc && soLer) document.getElementById("modal-processo-title").textContent = "Dados do Processo";
       document.getElementById("modal-processo").classList.add("open");
     }
@@ -2684,6 +2698,38 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
       saveStoredProcessos(processos);
       closeProcessModal();
+    }
+
+    // Monta o e-mail de atualização para o cliente (assunto + texto)
+    function mensagemAtualizacao(nomeCliente, cnj, obs) {
+      return {
+        assunto: "Atualização do seu processo " + cnj + " - Bergamini Advocacia",
+        texto: "Prezado " + nomeCliente + ",\n\n" +
+          "Informo que no seu processo " + cnj + " houve uma atualização: " + obs + "\n\n" +
+          "Atenciosamente,\nBergamini Advocacia"
+      };
+    }
+
+    // Abre o Gmail da conta do escritório com a mensagem pronta (o envio é feito no Gmail)
+    function enviarAtualizacaoCliente() {
+      const g = id => document.getElementById(id).value.trim();
+      const cnj = g("proc-cnj"), nome = g("proc-cliente"), obs = g("proc-obs");
+      if (!cnj) { alert("Informe o número do processo."); return; }
+      if (!nome) { alert("Selecione o cliente."); return; }
+      if (!obs) { alert("Escreva a atualização em \"Observações / Último Andamento\" antes de enviar."); return; }
+      const cli = getStoredClientes().find(c => c.nome === nome) || {};
+      const para = String(cli.email || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(para)) {
+        alert("O cliente " + nome + " não tem um e-mail válido no cadastro. Corrija em Clientes e tente de novo."); return;
+      }
+      const m = mensagemAtualizacao(nome, cnj, obs);
+      const url = "https://mail.google.com/mail/?authuser=" + encodeURIComponent(ESCRITORIO.email) +
+        "&view=cm&fs=1&to=" + encodeURIComponent(para) +
+        "&su=" + encodeURIComponent(m.assunto) + "&body=" + encodeURIComponent(m.texto);
+      const janela = window.open(url, "_blank");
+      if (janela) { try { janela.opener = null; } catch (e) {} }
+      else location.href = "mailto:" + encodeURIComponent(para) +
+        "?subject=" + encodeURIComponent(m.assunto) + "&body=" + encodeURIComponent(m.texto);
     }
 
     function editProcesso(id) {
