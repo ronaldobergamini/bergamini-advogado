@@ -1145,6 +1145,15 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     .res-dl dd a { color: var(--c-navy); }
     .res-nada { text-align: center; padding: 1.5rem 1rem 0.5rem; color: var(--c-text-body); }
     .res-nada strong { color: var(--c-navy); }
+    .busca-linha { display: flex; gap: 0.6rem; align-items: stretch; }
+    .busca-linha .busca-campo { flex: 1; }
+    .busca-linha .btn-main-dark { white-space: nowrap; justify-content: center; padding: 0.8rem 1.4rem; border: 0; cursor: pointer; }
+    .confirma-cpf { margin-top: 1.25rem; padding: 1.25rem 1.2rem; border: 1px solid rgba(196, 154, 90, 0.55); border-radius: 6px; background: #fffaf1; display: none; }
+    .confirma-cpf.show { display: block; animation: fadeInView 0.3s ease-out; }
+    .confirma-cpf p { margin: 0 0 0.75rem; font-size: 0.92rem; color: var(--c-text-body); }
+    .confirma-cpf .cpf4 { max-width: 9rem; text-align: center; font-size: 1.25rem; letter-spacing: 0.35em; font-variant-numeric: tabular-nums; }
+    .confirma-erro { color: #b42318; font-size: 0.86rem; margin: 0.6rem 0 0; min-height: 1.1em; }
+    @media (max-width: 560px) { .busca-linha { flex-direction: column; } }
     .consulta-nota { font-size: 0.8rem; color: #64748b; margin: 1.5rem 0 0; line-height: 1.5; text-align: center; }
 
     /* Print styles */
@@ -1716,22 +1725,33 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <span class="section-label">Acompanhamento</span>
         <h2 class="section-heading">Consulta Processual</h2>
         <p class="section-desc">
-          Digite o número do seu processo para saber se há prazo em aberto ou audiência agendada.
+          Digite o número do seu processo e confirme os 4 primeiros dígitos do CPF do cliente para saber se há prazo em aberto ou audiência agendada.
         </p>
       </div>
 
       <div class="consulta-panel">
-        <div class="busca-wrap">
+        <form class="busca-wrap" id="form-processo" autocomplete="off" novalidate>
           <label for="busca-processo" class="form-label">Número do processo</label>
-          <div class="busca-campo">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
-            <input type="text" id="busca-processo" class="form-control" inputmode="numeric" autocomplete="off"
-              placeholder="0000000-00.0000.0.00.0000" role="combobox" aria-expanded="false"
-              aria-controls="lista-sugestoes" aria-autocomplete="list">
+          <div class="busca-linha">
+            <div class="busca-campo">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+              <input type="text" id="busca-processo" class="form-control" inputmode="numeric" autocomplete="off"
+                placeholder="0000000-00.0000.0.00.0000" aria-describedby="busca-dica">
+            </div>
+            <button type="submit" class="btn-main-dark">Continuar</button>
           </div>
-          <ul class="sugestoes" id="lista-sugestoes" role="listbox" aria-label="Processos encontrados"></ul>
-          <p class="busca-dica" id="busca-dica">Comece a digitar: a partir de 4 números aparecem os processos parecidos para você escolher.</p>
-        </div>
+          <p class="busca-dica" id="busca-dica">Digite o número completo do processo.</p>
+        </form>
+
+        <form class="confirma-cpf" id="form-cpf" autocomplete="off" novalidate aria-live="polite">
+          <p><strong>Confirmação de segurança.</strong> Para ver as informações, digite os <strong>4 primeiros dígitos do CPF</strong> (ou CNPJ) do cliente titular do processo.</p>
+          <label for="cpf4" class="form-label">4 primeiros dígitos do CPF</label>
+          <div class="busca-linha">
+            <input type="password" id="cpf4" class="form-control cpf4" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••">
+            <button type="submit" class="btn-main-dark">Ver informações</button>
+          </div>
+          <p class="confirma-erro" id="cpf-erro"></p>
+        </form>
 
         <div class="resultado" id="resultado-consulta" aria-live="polite"></div>
 
@@ -2269,18 +2289,21 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 })();
 
 </script>
-  <!-- Consulta Processual: lê a coleção pública "consulta" do Firebase -->
+  <!-- Consulta Processual: só abre a ficha com número do processo + 4 primeiros dígitos do CPF -->
   <script src="firebase-config.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    const formProc = document.getElementById("form-processo");
     const campo = document.getElementById("busca-processo");
-    const lista = document.getElementById("lista-sugestoes");
     const dica = document.getElementById("busca-dica");
+    const formCpf = document.getElementById("form-cpf");
+    const campoCpf = document.getElementById("cpf4");
+    const erroCpf = document.getElementById("cpf-erro");
     const saida = document.getElementById("resultado-consulta");
-    const MIN = 4, MAX = 8;
-    let dados = null, carregando = null, itens = [], ativo = -1;
+    const MIN_DIGITOS = 7, MAX_TENTATIVAS = 5, BLOQUEIO_MIN = 15;
+    let db = null, numeroAtual = "";
 
     const so = t => String(t || "").replace(/\D/g, "");
     const esc = t => String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -2290,76 +2313,87 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     const dia = iso => iso ? DIAS[new Date(iso + "T12:00:00").getDay()] : "";
     // Formata 20 dígitos no padrão CNJ: NNNNNNN-DD.AAAA.J.TR.OOOO
     const fmtCNJ = n => n.length === 20 ? n.replace(/^(\d{7})(\d{2})(\d{4})(\d)(\d{2})(\d{4})$/, "$1-$2.$3.$4.$5.$6") : n;
-    const rotulo = r => r.cnj || fmtCNJ(r.numero);
 
-    function carregar() {
-      if (dados) return Promise.resolve(dados);
-      if (carregando) return carregando;
+    // Mesmo cálculo usado pela Área Interna ao publicar a ficha
+    async function chaveConsulta(numero, cpf4) {
+      const bytes = new TextEncoder().encode("jurispro-consulta|" + numero + "|" + cpf4);
+      const h = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+    function banco() {
+      if (db) return db;
       const cfg = window.FIREBASE_CONFIG;
-      if (!cfg || !cfg.apiKey) return Promise.reject(new Error("sem configuração"));
-      const db = getFirestore(initializeApp(cfg, "consulta-publica"));
-      dica.textContent = "Carregando a lista de processos...";
-      carregando = getDocs(collection(db, "consulta")).then(s => {
-        dados = s.docs.map(d => Object.assign({ numero: d.id }, d.data()));
-        dica.textContent = "Comece a digitar: a partir de " + MIN + " números aparecem os processos parecidos para você escolher.";
-        return dados;
-      }).catch(e => {
-        carregando = null;
+      if (!cfg || !cfg.apiKey) throw new Error("sem configuração");
+      db = getFirestore(initializeApp(cfg, "consulta-publica"));
+      return db;
+    }
+
+    // Limite de tentativas erradas neste aparelho
+    const LS = "jp_consulta_tentativas";
+    function tentativas() { try { return JSON.parse(localStorage.getItem(LS)) || { n: 0, ate: 0 }; } catch (e) { return { n: 0, ate: 0 }; } }
+    function guardar(t) { try { localStorage.setItem(LS, JSON.stringify(t)); } catch (e) {} }
+    function bloqueadoAte() { const t = tentativas(); return t.ate > Date.now() ? t.ate : 0; }
+    function errou() {
+      const t = tentativas(); t.n = (t.n || 0) + 1;
+      if (t.n >= MAX_TENTATIVAS) { t.n = 0; t.ate = Date.now() + BLOQUEIO_MIN * 60000; }
+      guardar(t); return t;
+    }
+
+    function limparResultado() { saida.classList.remove("show"); saida.innerHTML = ""; }
+    function esconderCpf() { formCpf.classList.remove("show"); campoCpf.value = ""; erroCpf.textContent = ""; }
+
+    campo.addEventListener("input", () => {
+      if (so(campo.value) !== numeroAtual) { numeroAtual = ""; esconderCpf(); limparResultado(); dica.textContent = "Digite o número completo do processo."; }
+    });
+    campoCpf.addEventListener("input", () => { campoCpf.value = so(campoCpf.value).slice(0, 4); erroCpf.textContent = ""; });
+
+    formProc.addEventListener("submit", ev => {
+      ev.preventDefault();
+      const d = so(campo.value);
+      limparResultado();
+      if (d.length < MIN_DIGITOS) { esconderCpf(); dica.textContent = "Digite o número completo do processo (somente o número, com ou sem pontos e traços)."; campo.focus(); return; }
+      numeroAtual = d;
+      campo.value = fmtCNJ(d);
+      dica.textContent = "Agora confirme os 4 primeiros dígitos do CPF abaixo.";
+      erroCpf.textContent = ""; campoCpf.value = "";
+      formCpf.classList.add("show");
+      setTimeout(() => campoCpf.focus(), 50);
+    });
+
+    formCpf.addEventListener("submit", async ev => {
+      ev.preventDefault();
+      limparResultado();
+      const cpf4 = so(campoCpf.value);
+      if (!numeroAtual) { campo.focus(); return; }
+      if (cpf4.length !== 4) { erroCpf.textContent = "Digite exatamente 4 números."; campoCpf.focus(); return; }
+      const ate = bloqueadoAte();
+      if (ate) { erroCpf.textContent = "Muitas tentativas. Tente de novo em " + Math.max(1, Math.ceil((ate - Date.now()) / 60000)) + " minuto(s) ou fale conosco pelo WhatsApp."; return; }
+      const botao = formCpf.querySelector("button"); botao.disabled = true;
+      erroCpf.textContent = "Consultando...";
+      try {
+        const snap = await getDoc(doc(banco(), "consulta", await chaveConsulta(numeroAtual, cpf4)));
+        if (!snap.exists()) {
+          const t = errou();
+          erroCpf.textContent = t.ate > Date.now()
+            ? "Muitas tentativas. Tente de novo em " + BLOQUEIO_MIN + " minutos ou fale conosco pelo WhatsApp."
+            : "Não encontramos informações com esses dados. Confira o número do processo e os 4 dígitos do CPF.";
+          if (window.gtag) gtag("event", "consulta_processual", { encontrado: false });
+          return;
+        }
+        guardar({ n: 0, ate: 0 });
+        erroCpf.textContent = "";
+        formCpf.classList.remove("show"); campoCpf.value = "";
+        mostrarResultado(fmtCNJ(numeroAtual), snap.data());
+      } catch (e) {
         console.error(e);
-        dica.textContent = "Não foi possível carregar a consulta agora. Tente de novo em instantes ou fale conosco pelo WhatsApp.";
-        throw e;
-      });
-      return carregando;
-    }
-
-    // Destaca o trecho digitado dentro do número formatado
-    function destacar(texto, digitos) {
-      const mapa = []; let limpo = "";
-      for (let i = 0; i < texto.length; i++) if (/\d/.test(texto[i])) { mapa.push(i); limpo += texto[i]; }
-      const k = limpo.indexOf(digitos);
-      if (k < 0 || !digitos) return esc(texto);
-      const ini = mapa[k], fim = mapa[k + digitos.length - 1] + 1;
-      return esc(texto.slice(0, ini)) + "<mark>" + esc(texto.slice(ini, fim)) + "</mark>" + esc(texto.slice(fim));
-    }
-
-    function fecharLista() {
-      lista.classList.remove("aberta"); lista.innerHTML = ""; itens = []; ativo = -1;
-      campo.setAttribute("aria-expanded", "false"); campo.removeAttribute("aria-activedescendant");
-    }
-
-    function mostrarLista(digitos) {
-      const achados = dados
-        .filter(r => so(r.numero).includes(digitos))
-        .sort((a, b) => (so(b.numero).startsWith(digitos) - so(a.numero).startsWith(digitos)) || rotulo(a).localeCompare(rotulo(b)));
-      itens = achados.slice(0, MAX); ativo = -1;
-      if (!itens.length) {
-        lista.innerHTML = '<li class="vazia" role="option" aria-disabled="true">Nenhum processo encontrado com esses números.</li>';
-      } else {
-        lista.innerHTML = itens.map((r, i) =>
-          '<li role="option" id="sug-' + i + '" data-i="' + i + '">' +
-          '<span>' + destacar(rotulo(r), digitos) + '</span>' +
-          '<small>' + [r.prazo && "prazo em aberto", r.audiencia && r.audiencia.data >= hoje() && "audiência agendada"].filter(Boolean).join(" · ") + '</small></li>'
-        ).join("") + (achados.length > MAX ? '<li class="vazia">… e mais ' + (achados.length - MAX) + '. Continue digitando para filtrar.</li>' : "");
-      }
-      lista.classList.add("aberta"); campo.setAttribute("aria-expanded", "true");
-    }
-
-    function marcar(i) {
-      [...lista.querySelectorAll("li[data-i]")].forEach(li => li.classList.toggle("ativa", +li.dataset.i === i));
-      ativo = i;
-      if (i >= 0) { campo.setAttribute("aria-activedescendant", "sug-" + i); const el = document.getElementById("sug-" + i); if (el) el.scrollIntoView({ block: "nearest" }); }
-    }
-
-    function escolher(r) {
-      campo.value = rotulo(r);
-      fecharLista();
-      mostrarResultado(r);
-    }
+        erroCpf.textContent = "Não foi possível consultar agora. Tente de novo em instantes ou fale conosco pelo WhatsApp.";
+      } finally { botao.disabled = false; }
+    });
 
     function linha(t, v) { return v ? "<dt>" + esc(t) + "</dt><dd>" + v + "</dd>" : ""; }
     const ehLink = t => /^https?:\/\//i.test(String(t || "").trim());
 
-    function mostrarResultado(r) {
+    function mostrarResultado(numero, r) {
       const pr = r.prazo, au = r.audiencia && r.audiencia.data && r.audiencia.data >= hoje() ? r.audiencia : null;
       const icoPrazo = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
       const icoAud = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
@@ -2376,53 +2410,15 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           linha("Comarca", esc(au.comarca)) + linha("Vara / Juízo", esc(au.vara)) + linha("Local", local) + "</dl></div>"
         : '<div class="res-bloco"><h4>' + icoAud + 'Audiência</h4><p class="res-sit">Nenhuma audiência agendada.</p></div>';
       saida.innerHTML =
-        '<div class="res-topo"><div><span class="res-rotulo">Processo</span><span class="res-num">' + esc(rotulo(r)) + '</span></div>' +
+        '<div class="res-topo"><div><span class="res-rotulo">Processo</span><span class="res-num">' + esc(numero) + '</span></div>' +
         (r.status ? '<span class="res-status">' + esc(r.status) + '</span>' : "") + "</div>" +
         '<div class="res-grid">' + blocoPrazo + blocoAud + "</div>";
       saida.classList.add("show");
+      dica.textContent = "Para consultar outro processo, digite um novo número.";
       if (window.gtag) gtag("event", "consulta_processual", { encontrado: true });
     }
 
-    function naoEncontrado(digitos) {
-      saida.innerHTML = '<div class="res-nada"><strong>Processo não encontrado.</strong><br>Confira o número digitado (' + esc(digitos) + '). ' +
-        'Se o processo é acompanhado pelo escritório e não aparece aqui, fale conosco pelo <a href="https://wa.me/5521999226406" target="_blank" rel="noopener noreferrer">WhatsApp</a>.</div>';
-      saida.classList.add("show");
-    }
-
-    campo.addEventListener("focus", () => { carregar().catch(() => {}); });
-    campo.addEventListener("input", async () => {
-      const d = so(campo.value);
-      saida.classList.remove("show");
-      if (d.length < MIN) { fecharLista(); return; }
-      try { await carregar(); } catch (e) { return; }
-      if (so(campo.value) !== d) return;        // a pessoa continuou digitando
-      const exato = dados.find(r => so(r.numero) === d);
-      if (exato && d.length >= 20) { escolher(exato); return; }
-      mostrarLista(d);
-    });
-    campo.addEventListener("keydown", ev => {
-      const n = itens.length;
-      if (ev.key === "ArrowDown" && n) { ev.preventDefault(); marcar((ativo + 1) % n); }
-      else if (ev.key === "ArrowUp" && n) { ev.preventDefault(); marcar((ativo - 1 + n) % n); }
-      else if (ev.key === "Escape") fecharLista();
-      else if (ev.key === "Enter") {
-        ev.preventDefault();
-        if (ativo >= 0 && itens[ativo]) { escolher(itens[ativo]); return; }
-        const d = so(campo.value);
-        if (!dados || d.length < MIN) return;
-        const exato = dados.find(r => so(r.numero) === d);
-        if (exato) escolher(exato);
-        else if (itens.length === 1) escolher(itens[0]);
-        else { fecharLista(); naoEncontrado(campo.value.trim()); }
-      }
-    });
-    lista.addEventListener("mousedown", ev => {
-      const li = ev.target.closest("li[data-i]"); if (!li) return;
-      ev.preventDefault(); escolher(itens[+li.dataset.i]);
-    });
-    document.addEventListener("click", ev => { if (!ev.target.closest(".busca-wrap")) fecharLista(); });
-
-    window.ConsultaProcessual = { abrir: () => { carregar().catch(() => {}); setTimeout(() => campo.focus({ preventScroll: true }), 350); } };
+    window.ConsultaProcessual = { abrir: () => { setTimeout(() => campo.focus({ preventScroll: true }), 350); } };
     if (location.hash === "#consulta") window.ConsultaProcessual.abrir();
   </script>
   <!-- Aviso de cookies (LGPD) -->

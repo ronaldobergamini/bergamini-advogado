@@ -2,13 +2,16 @@
    JurisPro — Bergamini Advocacia — AUTOMAÇÕES (Google Apps Script)
    ---------------------------------------------------------------------
    Roda no Google, sozinho, sem ninguém abrir o sistema:
-     • Todo dia ~7h ......... agenda do dia (audiências e prazos de HOJE),
+     • Todo dia ~7h ......... agenda do dia (todo dia, mesmo sem nada:
+                              hoje + próximos 7 dias),
                               lembrete de audiência 2 dias antes
                               (advogado + cliente) e busca de novas
                               publicações no Comunica PJe (OAB e processos)
      • Toda sexta ~8h ....... resumo das tarefas de seg a sex da semana
                               seguinte para o advogado
-     • Todo domingo ~3h ..... cópia de segurança dos dados no OneDrive
+     • Todo domingo ~3h ..... cópia de segurança no OneDrive (opcional:
+                              só roda depois de configurado; veja
+                              LEIA-ME-OneDrive.md)
      • A cada 5 minutos ..... e-mail avisando de novo pedido de acesso
                               à Área Interna, com botões para aprovar
 
@@ -77,6 +80,8 @@ function diagnostico() {
     log((gatilhos.indexOf(f) >= 0 ? "OK  " : "FALTA ") + "agendamento " + f +
         (gatilhos.indexOf(f) >= 0 ? "" : "  -> rode a função instalar")));
   log("Avisos internos vão para: " + destinoInterno());
+  log("Backup no OneDrive: " + (oneDriveConfigurado() ? "ligado" : "não configurado (opcional — não afeta a agenda nem os lembretes)"));
+  log("Agenda de hoje: " + (PropertiesService.getScriptProperties().getProperty("agendaDia") === hojeISO() ? "já enviada hoje" : "ainda não enviada hoje"));
   log("Cota de e-mails restante hoje: " + MailApp.getRemainingDailyQuota());
   let processos = [];
   try { processos = lerColecao("processos"); log("OK  banco lido: " + processos.length + " processo(s)"); }
@@ -97,7 +102,15 @@ function diagnostico() {
 /* ============================ ROTINAS ============================ */
 
 function rotinaBackup() {
+  // Backup no OneDrive é opcional: enquanto não for configurado, não faz nada e não manda aviso.
+  if (!oneDriveConfigurado()) { Logger.log("Backup no OneDrive não configurado: ignorado."); return; }
   try { backupSemanal(); } catch (e) { avisarErro("backup no OneDrive", e); }
+}
+
+/** true só depois de colar o ID do Azure E concluir a autorização (veja LEIA-ME-OneDrive). */
+function oneDriveConfigurado() {
+  if (!CFG.msClientId || /COLE_AQUI/.test(CFG.msClientId)) return false;
+  return !!PropertiesService.getScriptProperties().getProperty("msRefreshToken");
 }
 
 function rotinaDiaria() {
@@ -138,36 +151,51 @@ function lembretesAudiencia() {
 
 /** Todo dia de manhã: audiências e prazos de HOJE (uma vez por dia, só se houver algo). */
 function agendaDoDia() {
-  const hoje = hojeISO();
+  const hoje = hojeISO(), fim = maisDias(hoje, 7);
   const props = PropertiesService.getScriptProperties();
   if (props.getProperty("agendaDia") === hoje) return;
   const clientes = lerColecao("clientes");
   const itens = [];
   lerColecao("processos").forEach(p => {
     const temPrazo = p.temPrazo !== undefined ? (p.temPrazo && p.prazo) : p.prazo;
-    if (temPrazo && !p.prazoCumprido && p.prazo === hoje)
-      itens.push({ tipo: "Prazo", hora: "", p: p, desc: p.prazoDesc || p.obs || "" });
+    if (temPrazo && !p.prazoCumprido && p.prazo >= hoje && p.prazo <= fim)
+      itens.push({ data: p.prazo, tipo: "Prazo", hora: "", p: p, desc: p.prazoDesc || p.obs || "" });
     const a = p.audiencia || {};
-    if (p.temAudiencia && a.data === hoje && !a.cumprido)
-      itens.push({ tipo: "Audiência", hora: a.hora || "", p: p,
+    if (p.temAudiencia && a.data && a.data >= hoje && a.data <= fim && !a.cumprido)
+      itens.push({ data: a.data, tipo: "Audiência", hora: a.hora || "", p: p,
         desc: [a.tipo, a.modo, a.comarca, a.vara, a.local].filter(Boolean).join(" · ") });
   });
-  props.setProperty("agendaDia", hoje);
-  if (!itens.length) return;
-  itens.sort((x, y) => (x.hora || "99").localeCompare(y.hora || "99"));
-  const cab = "<tr>" + ["Horário", "Tipo", "Processo", "Cliente"].map(th).join("") + "</tr>";
-  const linhas = itens.map(t => {
+  itens.sort((x, y) => x.data.localeCompare(y.data) || (x.hora || "99").localeCompare(y.hora || "99"));
+  const deHoje = itens.filter(t => t.data === hoje), proximos = itens.filter(t => t.data !== hoje);
+  const cab = c => "<tr>" + c.map(th).join("") + "</tr>";
+  const linha = (t, comData) => {
     const c = clientes.find(k => k.nome === t.p.cliente) || {};
-    return "<tr>" + td(esc(t.hora || "—")) +
+    return "<tr>" + (comData ? td(esc(dataBR(t.data)) + "<br><span style='color:#64748b'>" + esc(diaSemana(t.data)) + "</span>") : "") +
+      td(esc(t.hora || "—")) +
       td("<span style='font-weight:600;color:" + (t.tipo === "Prazo" ? "#92400e" : "#3730a3") + "'>" + t.tipo + "</span>") +
       td(esc(t.p.cnj || "") + (t.desc ? "<br><span style='color:#64748b'>" + esc(t.desc) + "</span>" : "")) +
       td(esc(t.p.cliente || "") + (c.telefone ? "<br><span style='color:#64748b'>" + esc(c.telefone) + "</span>" : "")) + "</tr>";
-  }).join("");
-  const nAud = itens.filter(t => t.tipo === "Audiência").length, nPrazo = itens.length - nAud;
+  };
+  const blocoHoje = deHoje.length
+    ? tabela(cab(["Horário", "Tipo", "Processo", "Cliente"]) + deHoje.map(t => linha(t, false)).join(""))
+    : "<p style='font-size:14px'>Nenhuma audiência ou prazo para hoje.</p>";
+  const blocoProx = "<h3 style='font-size:15px;color:#061529;margin:22px 0 8px'>Próximos 7 dias</h3>" + (proximos.length
+    ? tabela(cab(["Data", "Horário", "Tipo", "Processo", "Cliente"]) + proximos.map(t => linha(t, true)).join(""))
+    : "<p style='font-size:14px'>Nada agendado até " + dataBR(fim) + ".</p>");
+  const nAud = deHoje.filter(t => t.tipo === "Audiência").length, nPrazo = deHoje.length - nAud;
+  const resumo = deHoje.length ? [nAud && nAud + " audiência(s)", nPrazo && nPrazo + " prazo(s)"].filter(Boolean).join(" e ") : "nada para hoje";
   enviar(destinoInterno(),
-    "Hoje, " + dataBR(hoje) + ": " + [nAud && nAud + " audiência(s)", nPrazo && nPrazo + " prazo(s)"].filter(Boolean).join(" e "),
-    moldura("Agenda de hoje — " + dataBR(hoje) + " (" + diaSemana(hoje) + ")", tabela(cab + linhas) +
+    "JurisPro — Agenda de hoje, " + dataBR(hoje) + ": " + resumo,
+    moldura("Agenda de hoje — " + dataBR(hoje) + " (" + diaSemana(hoje) + ")", blocoHoje + blocoProx +
       "<p style='margin-top:18px'><a href='" + CFG.site + "/jurispro_gest_o_processual_2_.html'>Abrir o JurisPro</a></p>"));
+  props.setProperty("agendaDia", hoje);   // só marca como enviada depois de enviar
+}
+
+/** Manda AGORA a agenda de hoje (para testar). */
+function testarAgenda() {
+  PropertiesService.getScriptProperties().deleteProperty("agendaDia");
+  agendaDoDia();
+  Logger.log("Agenda de hoje enviada para " + destinoInterno());
 }
 
 /** Sexta-feira: tarefas de segunda a sexta da semana seguinte. */

@@ -10,8 +10,9 @@ rules_version = '2';
 //   Perfis antigos, sem o campo "permissoes", seguem com acesso completo.
 // • Ninguém de fora lê nada, exceto a tabela de nomes de usuário
 //   (necessária para entrar digitando o usuário em vez do e-mail) e a
-//   Consulta Processual do site (coleção "consulta": só número do
-//   processo, status, prazo em aberto e audiência agendada).
+//   Consulta Processual do site (coleção "consulta": só status, prazo em
+//   aberto e audiência; cada ficha só abre com nº do processo + 4 primeiros
+//   dígitos do CPF do cliente).
 // • O script de e-mails automáticos usa a conta Google do advogado
 //   e não depende destas regras.
 // =====================================================================
@@ -84,9 +85,13 @@ service cloud.firestore {
       allow update, delete: if pode('editar');
     }
 
-    // Consulta Processual pública do site (leitura aberta)
-    match /consulta/{numero} {
-      allow read: if true;
+    // Consulta Processual pública do site.
+    // Cada ficha fica num endereço calculado com o número do processo + os 4 primeiros
+    // dígitos do CPF do cliente. Visitante só abre UMA ficha sabendo os dois (get);
+    // listar a coleção inteira (list) só para quem está logado na Área Interna.
+    match /consulta/{chave} {
+      allow get: if true;
+      allow list: if pode('incluir') || pode('editar');
       allow create: if pode('incluir') || pode('editar');
       allow update: if pode('incluir') || pode('editar');
       allow delete: if pode('editar');

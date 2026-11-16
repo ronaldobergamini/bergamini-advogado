@@ -1701,7 +1701,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             <label class="check-consulta" for="proc-consulta">
               <input type="checkbox" id="proc-consulta" checked>
               <span><strong>Mostrar na Consulta Processual do site</strong><br>
-              <span style="color:#64748b; font-size:0.8rem;">Quem digitar o número do processo no site vê se há prazo em aberto e audiência agendada (datas, horário, local). Nome do cliente, área e observações nunca aparecem. <b>Desmarque em processos com segredo de justiça</b> (ex.: família).</span></span>
+              <span style="color:#64748b; font-size:0.8rem;">Quem digitar o número do processo <b>e os 4 primeiros dígitos do CPF/CNPJ do cliente</b> vê se há prazo em aberto e audiência agendada (datas, horário, local). Sem CPF/CNPJ no cadastro do cliente, o processo não aparece. Nome do cliente, área e observações nunca aparecem. <b>Desmarque em processos com segredo de justiça</b> (ex.: família).</span></span>
             </label>
           </div>
 
@@ -3074,20 +3074,30 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       const ordem = (a, b) => (parseInt(String(b.id).replace(/\D/g, "")) || 0) - (parseInt(String(a.id).replace(/\D/g, "")) || 0);
 
       // ---------- Consulta Processual pública (coleção "consulta") ----------
-      // Só vão para lá: número do processo, status, prazo em aberto e audiência agendada.
-      // Nada de cliente, área, observações, honorários ou dados bancários.
+      // Só vão para lá: status, prazo em aberto e audiência agendada.
+      // Nada de cliente, número do processo, área, observações, honorários ou dados bancários.
+      // O documento fica guardado num endereço secreto calculado a partir do número do processo
+      // + os 4 primeiros dígitos do CPF/CNPJ do cliente. Sem saber os dois, não dá para abrir.
       const hojeStr = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-      function fichaConsulta(p) {
+      async function chaveConsulta(numero, cpf4) {
+        const bytes = new TextEncoder().encode("jurispro-consulta|" + numero + "|" + cpf4);
+        const h = await crypto.subtle.digest("SHA-256", bytes);
+        return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, "0")).join("");
+      }
+      async function fichaConsulta(p) {
         if (!p || p.consultaPublica === false) return null;
-        const id = String(p.cnj || "").replace(/\D/g, "");
-        if (id.length < 7) return null;
+        const numero = String(p.cnj || "").replace(/\D/g, "");
+        if (numero.length < 7) return null;
+        const cli = contatoCliente(p.cliente);
+        const cpf4 = String((cli && cli.doc) || "").replace(/\D/g, "").slice(0, 4);
+        if (cpf4.length < 4) return null;   // sem CPF/CNPJ cadastrado: não aparece no site
         const comPrazo = (p.temPrazo !== undefined ? !!p.temPrazo && !!p.prazo : !!p.prazo) && !p.prazoCumprido;
         const a = p.audiencia || {};
         const comAud = !!p.temAudiencia && !!a.data && !a.cumprido;
         return {
-          id: id,
+          id: await chaveConsulta(numero, cpf4),
           dados: {
-            cnj: String(p.cnj || "").trim(), numero: id, status: p.status || "",
+            status: p.status || "",
             prazo: comPrazo ? { data: p.prazo, descricao: p.prazoDesc || "" } : null,
             audiencia: comAud ? { data: a.data, hora: a.hora || "", tipo: a.tipo || "", modo: a.modo || "",
               comarca: a.comarca || "", vara: a.vara || "", local: a.local || "" } : null
@@ -3096,39 +3106,43 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       }
       const gravarConsulta = f => setDoc(doc(db, "consulta", f.id), Object.assign({}, f.dados, { atualizadoEm: hojeStr() }));
       const apagarConsulta = id => deleteDoc(doc(db, "consulta", id));
-      const outroUsaNumero = (id, lista, menosId) => lista.some(p => p.id !== menosId && (fichaConsulta(p) || {}).id === id);
 
       window.JP = {
         salvar: (col, x) => setDoc(doc(db, col, x.id), JSON.parse(JSON.stringify(x))),
         excluir: (col, id) => deleteDoc(doc(db, col, id)),
         consulta: {
-          // Chamado a cada processo incluído/alterado/excluído
-          trocar(antigo, novo, lista) {
-            const fa = fichaConsulta(antigo), fn = fichaConsulta(novo);
-            const falha = e => console.warn("Consulta pública não atualizada:", e);
-            if (fa && (!fn || fa.id !== fn.id) && !outroUsaNumero(fa.id, lista, antigo.id)) apagarConsulta(fa.id).catch(falha);
-            if (fn) gravarConsulta(fn).catch(falha);
-          }
+          // Chamado a cada processo incluído/alterado/excluído: reconfere tudo
+          trocar() { agendarConferencia(); }
         }
       };
 
-      // Na entrada de quem pode editar: confere se a consulta pública bate com os processos
-      let consultaConferida = false;
+      // Mantém a consulta pública igual aos processos (e aos CPFs dos clientes).
+      // Só roda depois que processos E clientes foram carregados.
+      const CARREGOU = { processos: false, clientes: false };
+      let conferindo = false, conferirDeNovo = false, timerConferir = null;
+      function agendarConferencia() {
+        clearTimeout(timerConferir);
+        timerConferir = setTimeout(conferirConsulta, 1200);
+      }
       async function conferirConsulta() {
-        if (consultaConferida || !(PERM.editar || PERM.incluir)) return;
-        consultaConferida = true;
+        if (!(PERM.editar || PERM.incluir) || !CARREGOU.processos || !CARREGOU.clientes) return;
+        if (conferindo) { conferirDeNovo = true; return; }
+        conferindo = true;
         try {
           const atual = new Map();
           (await getDocs(collection(db, "consulta"))).forEach(d => atual.set(d.id, d.data()));
           const esperado = new Map();
-          CACHE.processos.forEach(p => { const f = fichaConsulta(p); if (f) esperado.set(f.id, f); });
+          for (const p of CACHE.processos) { const f = await fichaConsulta(p); if (f) esperado.set(f.id, f); }
           const semData = o => { const c = Object.assign({}, o); delete c.atualizadoEm; return JSON.stringify(c, Object.keys(c).sort()); };
           for (const [id, f] of esperado) {
             const ja = atual.get(id);
             if (!ja || semData(ja) !== semData(f.dados)) await gravarConsulta(f);
           }
+          // Apaga o que não deve mais aparecer (inclui as fichas antigas, guardadas pelo número)
           if (PERM.editar) for (const id of atual.keys()) if (!esperado.has(id)) await apagarConsulta(id);
-        } catch (e) { console.warn("Conferência da consulta pública:", e); consultaConferida = false; }
+        } catch (e) { console.warn("Conferência da consulta pública:", e); }
+        conferindo = false;
+        if (conferirDeNovo) { conferirDeNovo = false; agendarConferencia(); }
       }
 
       function mostrarApp(user, perfil, admin) {
@@ -3154,10 +3168,11 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         const erro = e => { console.error(e); alert("Erro ao carregar dados: " + traduz(e)); };
         assinaturas.push(onSnapshot(collection(db, "processos"), s => {
           CACHE.processos = s.docs.map(d => d.data()).sort(ordem); refreshAll();
-          conferirConsulta();
+          CARREGOU.processos = true; agendarConferencia();
         }, erro));
         assinaturas.push(onSnapshot(collection(db, "clientes"), s => {
           CACHE.clientes = s.docs.map(d => d.data()).sort(ordem); refreshAll();
+          CARREGOU.clientes = true; agendarConferencia();
         }, erro));
         if (admin) {
           assinaturas.push(onSnapshot(query(collection(db, "users"), where("status", "==", "pendente")), s => {
@@ -3171,7 +3186,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       onAuthStateChanged(auth, async user => {
         if (cadastrando) return;
         assinaturas.forEach(f => f()); assinaturas = [];
-        if (!user) { consultaConferida = false; mostrarLogin(); return; }
+        if (!user) { CARREGOU.processos = CARREGOU.clientes = false; mostrarLogin(); return; }
         try {
           if (ehAdminEmail(user)) { await user.reload(); await user.getIdToken(true); }
           if (ehAdminEmail(user) && !user.emailVerified) {
